@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>es.billingweb</groupId>
+    <artifactId>BillingWeb_jOOQ</artifactId>
+    <version>1.0-SNAPSHOTE</version>
+    <packaging>war</packaging>
+
+    <name>BillingWeb_jOOQ</name>
+
+    <properties>
+        <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    
+    <dependencies>
+        <dependency>
+            <groupId>org.primefaces.extensions</groupId>
+            <artifactId>primefaces-extensions</artifactId>
+            <version>6.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.primefaces</groupId>
+            <artifactId>primefaces</artifactId>
+            <version>6.1</version>
+        </dependency>
+        
+        <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.1</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.primefaces.themes/all-themes -->
+        <dependency>
+            <groupId>org.primefaces.themes</groupId>
+            <artifactId>all-themes</artifactId>
+            <version>1.0.9</version>
+        </dependency>
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-web-api</artifactId>
+            <version>7.0</version>
+            <scope>provided</scope>
+        </dependency>
+        
+        <!--  JOOQ DEPENDENCIES - START -->                
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq</artifactId>
+            <version>3.8.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq-meta</artifactId>
+            <version>3.8.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq-codegen</artifactId>
+            <version>3.8.2</version>
+        </dependency>       
+        <!-- JOO DEPENDENCIES - END -->
+        
+        <!-- log4j DEPENDENCIES - START -->            
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>2.6.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.6.2</version>
+        </dependency>
+        <!-- web servlet -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-web</artifactId>
+            <version>2.6.2</version>
+            <scope>runtime</scope>
+        </dependency>    
+        <!-- log4j DEPENDENCIES - END -->
+        
+        <!-- POSTGRESQL DEPENDENCIES - START -->
+        <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->               
+       <!-- <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>9.4-1202-jdbc42</version>
+        </dependency>                
+        -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.1.4.jre7</version>
+        </dependency>
+        <!-- POSTGRESQL DEPENDENCIES - END -->  
+        
+        <!-- OMNIFACES DEPENDENCIES - START -->
+        <dependency>
+            <groupId>org.omnifaces</groupId>
+            <artifactId>omnifaces</artifactId>
+            <version>2.6.1</version>
+        </dependency>
+<!-- OMNIFACES DEPENDENCIES - END -->
+   
+        
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                    <compilerArguments>
+                        <endorseddirs>${endorsed.dir}</endorseddirs>
+                    </compilerArguments>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.6</version>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${endorsed.dir}</outputDirectory>
+                            <silent>true</silent>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>javax</groupId>
+                                    <artifactId>javaee-endorsed-api</artifactId>
+                                    <version>7.0</version>
+                                    <type>jar</type>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            
+            <!-- EXEC MAVEN PLUGIN - to execute program and add a resources directory for our log log4j.xml file for loggin purpose -->            
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.5.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <systemProperties>
+                        <systemProperty>
+                            <key>jdbc.driver</key>
+                            <value>org.postgresql.Driver</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>jdbc.user</key>
+                            <value>billing_admin</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>jdbc.password</key>
+                            <value>billing_admin</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>jdbc.url</key>
+                            <value>jdbc:postgresql://localhost:5432/db_billing</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>jdbc.database.name</key>
+                            <value>db_billing</value>
+                        </systemProperty>                         
+                    </systemProperties>
+                </configuration>
+            </plugin>
+            
+            <!-- BUILD HELPER MAVEN -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.10</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/main/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            
+            <!-- JOOQ - CODEGEN-MAVEN PLUGIN -->
+            <plugin>
+
+                <!-- Specify the maven code generator plugin -->
+                <!-- Use org.jooq            for the Open Source edition
+                org.jooq.pro        for commercial editions, 
+                org.jooq.pro-java-6 for commercial editions with Java 6 support,
+                org.jooq.trial      for the free trial edition -->
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq-codegen-maven</artifactId>
+                <version>3.8.2</version>
+
+                <!-- The plugin should hook into the generate goal -->
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+
+                <!-- Manage the plugin's dependency. In this example, we'll use a PostgreSQL database -->
+                <dependencies>
+                    <dependency>
+                        <groupId>org.postgresql</groupId>
+                        <artifactId>postgresql</artifactId>
+                        <!-- <version>9.4-1202-jdbc42</version> -->
+                        <version>42.1.4.jre7</version>    
+                    </dependency>
+                </dependencies>
+
+                <!-- Specify the plugin configuration.
+                The configuration format is the same as for the standalone code generator -->
+                <configuration>
+                    <!-- JDBC connection parameters -->
+                    <jdbc>
+                        <driver>org.postgresql.Driver</driver>
+                        <url>jdbc:postgresql://localhost:5432/db_billing</url>
+                        <user>billing_admin</user>
+                        <password>billing_admin</password>
+                    </jdbc>
+
+                    <!-- Generator parameters -->
+                    <generator>
+                        <database>
+                            <name>org.jooq.util.postgres.PostgresDatabase</name>                            
+                            <!-- All elements that are generated from your schema (A Java regular expression.
+                                 Use the pipe to separate several expressions) Watch out for
+                                 case-sensitivity. Depending on your database, this might be
+                                 important!
+           
+                                 You can create case-insensitive regular expressions using this syntax: (?i:expr)
+           
+                                 Whitespace is ignored and comments are possible.
+                            -->
+                            <!-- <includes>v_user_profile|test_menu|tid_profile_id|mt_profile|mt_status|mt_entity|it_user|tid_user_id|tid_user_id_user_id_seq|tid_profile_id_profile_id_seq</includes> -->
+                            <includes>.*</includes>
+                            <excludes>.*_old</excludes>
+                            <inputSchema>billing</inputSchema>
+                        </database>
+                        <generate>
+                            <!-- Generate POJOs in addition to Record classes for usage of the
+                            ResultQuery.fetchInto(Class) API
+                            Defaults to false -->
+                            <pojos>true</pojos>
+                            <!-- Generate interfaces that will be implemented by records and/or pojos.
+                            You can also use these interfaces in Record.into(Class<?>) and similar
+                            methods, to let jOOQ return proxy objects for them.
+                            Defaults to false -->
+                            <interfaces>true</interfaces>
+                            <!-- Generate DAOs in addition to POJO classes
+                            Defaults to false -->
+                            <daos>true</daos>
+                            <!-- Allow to turn off the generation of global object references, which include
+  
+                                - Tables.java
+                                - Sequences.java
+                                - UDTs.java
+
+                                Turning off the generation of the above files may be necessary for very
+                                large schemas, which exceed the amount of allowed constants in a class's
+                                constant pool (64k) or, whose static initialiser would exceed 64k of
+                                byte code
+       
+                            Defaults to true -->
+                            <globalObjectReferences>true</globalObjectReferences>
+                        </generate>
+                        <target>
+                            <packageName>es.billingweb.model</packageName>
+                            <directory>target/generated-sources/jooq</directory>
+                        </target>
+                        
+                    </generator>
+                </configuration>
+            </plugin>                 
+            
+        </plugins>
+    </build>
+    <repositories>
+        <repository>
+            <url>http://repository.primefaces.org/</url>
+            <id>PrimeFaces-maven-lib</id>
+            <layout>default</layout>
+            <name>Repository for library PrimeFaces-maven-lib</name>
+        </repository>
+    </repositories>
+</project>

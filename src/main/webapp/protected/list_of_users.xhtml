@@ -1,0 +1,106 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+
+
+    
+    <h:body>
+        <ui:composition template="./../resources/templates/mainTemplate.xhtml">
+            <ui:define name="title">#{pages.T_USERS_LIST} </ui:define>
+            <ui:define name="content">   
+                <h:form id="userList">    
+                    <p:growl id="messages" for="messages" showDetail="true" autoUpdate="true"  /> 
+                    <p:panelGrid id="userPanel" columns="1" style="margin-bottom:50px">                
+
+                        <p:dataTable id="userTable" var="user" value="#{listOfUsersController.usersList()}" 
+                                     emptyMessage="Any user for this search criteria"
+                                     paginator="true"
+                                     rows="5" style="width:900px" 
+                                     selection="#{listOfUsersController.selectedUser}">
+
+                            <f:facet name="header">  
+                                Current System's Users      
+                                <p>
+                                    <p:commandButton value="New user" title="Create a new user" 
+                                                     action="/protected/createUser.xhtml?faces-redirect=true" > 
+                                          
+                                        
+                                    </p:commandButton>
+
+                                </p>
+                            </f:facet>  
+
+                            <f:facet name="footer">                          
+                               <!-- <p:button value="Exit" title="Return to the main page" />       -->
+                            </f:facet> 
+
+
+                            <!-- DATA -->
+                            <p:column id="userId" headerText="#{tables.VW_USER_COL_USER_ID}" rendered="false" >
+                                <h:outputText value="#{user.userId}" />
+                            </p:column>
+
+                            <p:column id="userCode" headerText="#{tables.VW_USER_COL_USER_CODE}"  rendered="true" >
+                                <h:outputText value="#{user.userCode}" />
+                            </p:column>
+
+                            <p:column id="userName" headerText="#{tables.VW_USER_COL_USER_NAME}" rendered="true" >
+                                <h:outputText value="#{user.userName}" />
+                            </p:column>
+                            <p:column id="userPassword" headerText="#{tables.VW_USER_COL_USER_PASSWORD}" rendered="false" >
+                                <h:outputText value="#{user.password}" />
+                            </p:column>
+                            <p:column id="profileId" headerText="#{tables.VW_USER_COL_PROFILE_ID}" rendered="false" >
+                                <h:outputText value="#{user.profileId}" />
+                            </p:column>
+                            <p:column id="profileCode" headerText="#{tables.VW_USER_COL_PROFILE_CODE}" rendered="true" >
+                                <h:outputText value="#{user.profileCode}" />
+                            </p:column>
+                            <p:column id="profileDescription" headerText="#{tables.VW_USER_COL_PROFILE_DESCRIPTION}" rendered="true" >
+                                <h:outputText value="#{user.profileDescription}" />
+                            </p:column>
+
+                            <!-- ACTIONS -->
+                            <p:column headerText="Options">
+                                <p:commandButton
+                                    update="userList:userPanel"
+                                    icon="#{properties.I_DELETE}" title="Delete" action="#{createUserController.deleteUser(user)}" >                                    
+                                    <p:confirm header="Delete user" message="Click OK to delete the user #{user.userCode}" icon="ui-icon-alert" />
+
+                                </p:commandButton>
+                                <p:button
+                                    icon="#{properties.I_EDIT}" title="Modify" >
+                                    <f:param name="userId" value=""></f:param>
+                                </p:button>
+                                <p:button
+                                    icon="#{properties.I_SEARCH}" title="Detail" outcome="/protected/user_detail.xhtml">                                                                       
+                                    <f:param id="fromURL" name="fromURL" value=" #{listOfUsersController.currentURL}"></f:param> 
+                                    <f:param id="userIdSearch" name="userId" value=" #{user.userId}"></f:param>         
+                                </p:button>                        
+
+                            </p:column>	  
+                        </p:dataTable>
+
+                    </p:panelGrid>
+
+                    <!-- diálogo confirmación borrado -->	
+                    <p:confirmDialog global="true" styleClass="change-position">
+                        <p:commandButton value="#{properties.L_OK}" type="button" styleClass="ui-confirmdialog-yes" icon="#{properties.I_OK}"/>
+                        <p:commandButton value="#{properties.L_CANCEL}" type="button" styleClass="ui-confirmdialog-no" icon="#{properties.I_CANCEL}"/>
+                    </p:confirmDialog>
+                </h:form>
+                <p></p>
+                <h:form id="bottom">
+                    <p></p>
+                    <!-- <p:commandButton value="RETURN HOME" icon="{properties.I_HOME}" action="{loginPageController.goHome()}">
+                    </p:commandButton> -->
+                </h:form>
+            </ui:define>
+        </ui:composition>
+    </h:body>
+</html>

@@ -1,0 +1,762 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+   
+
+    <f:metadata>
+        <f:viewParam id="equipmentTypeId" name="equipmentTypeId" value="#{mT_EquipmentTypeDetailController.equipmentTypeId}" />
+        <f:viewParam id="previousPage" name="previousPage" value="#{mT_EquipmentTypeDetailController.previousPage}" />                   
+        <f:viewAction id="defaultControlVariables" 
+                      action="#{mT_EquipmentTypeDetailController.defaultValueControlVariablesIni()}" 
+                      phase="INVOKE_APPLICATION" >
+        </f:viewAction>   
+        <f:viewAction id="setData" 
+                      action="#{mT_EquipmentTypeDetailController.loadDataList()}" 
+                      phase="INVOKE_APPLICATION" >
+        </f:viewAction>
+    </f:metadata>
+
+    <h:body>        
+
+        <ui:composition id="mainTemplate" template="./../resources/templates/mainTemplate.xhtml">
+            <ui:define id="title" name="title">#{pages.T_CATALOG_EQUIPMENT_TYPE_DETAIL} </ui:define>
+            <ui:define id="content" name="content">   
+                <h:form id="form"  >  
+                    <p:growl id="messageGrowl"  showDetail="true" autoUpdate="true"  /> 
+
+                    <p:remoteCommand id="remoteCommandUpdateTable" name="updateTable"  
+                                     process="@this" update="form:table" />
+
+                    <p:dataTable id="table" var="data" 
+                                 value="#{mT_EquipmentTypeDetailController.dataList}"                                     
+                                 emptyMessage="Any equipment type for this search criteria"
+                                 resizableColumns="true" 
+                                 scrollable="true"  scrollWidth="100%" 
+                                 paginator="true"                                      
+                                 tableStyle="table-layout:fixed;width:100%;"
+                                 rows="10"     
+                                 editable="true"  
+                                 rowIndexVar="rowIndex"    
+                                 widgetVar="filteredTable"
+                                 filteredValue="#{mT_EquipmentTypeDetailController.filteredDataList}"
+                                 selection="#{mT_EquipmentTypeDetailController.selectedData}">                           
+
+                        <f:facet id="facetHeader" name="header">  
+                            Equipment Type Detail
+                        </f:facet>  
+
+
+                        <f:facet id="facetFooter" name="footer">     
+                            <p:commandButton id="saveButton" value="Save Changes" 
+                                             title="Save the changes" 
+                                             icon="ui-icon-disk"
+                                             disabled="#{mT_EquipmentTypeDetailController.editingMode ||  !mT_EquipmentTypeDetailController.changes}"
+                                             immediate="true"                                             
+                                             actionListener="#{mT_EquipmentTypeDetailController.saveChanges()}" > 
+                                <p:confirm id="confirmDialog" header="EQUIPMENT TYPE - SAVE CHANGES" 
+                                           message="Do you want to save the changes into the sistem?" 
+                                           icon="ui-icon-alert" />
+                            </p:commandButton>
+                        </f:facet> 
+
+                        <p:ajax id="ajaxRowEditInit" event="rowEditInit"  
+                                listener="#{mT_EquipmentTypeDetailController.onRowInit}" 
+                                update="form:messageGrowl" >
+                        </p:ajax>
+                        <p:ajax id="ajaxRowEdit" event="rowEdit" 
+                                listener="#{mT_EquipmentTypeDetailController.onRowEdit}"  
+                                update="form:messageGrowl"   
+                                oncomplete="if (!args.validationFailed) {updateTable();}">                            
+                        </p:ajax>
+                        <p:ajax id="ajaxRowEditCancel" event="rowEditCancel" 
+                                listener="#{mT_EquipmentTypeDetailController.onRowCancel}" 
+                                update="form:messageGrowl" 
+                                oncomplete="updateTable()" >
+                        </p:ajax>
+
+                        <!-- EDITION -->   
+                        <p:column  id="addRow"
+                                   style="font-family:Arial Black;
+                                   text-align: center;
+                                   font-size: 12px;
+                                   width: 70px;    
+                                   overflow: hidden"
+                                   headerText="ADD ROW"                                       
+                                   >
+                            <p:commandButton  id="addButton" 
+                                              icon="fa fa-plus" 
+                                              actionListener="#{mT_EquipmentTypeDetailController.addRow()}"                                              
+                                              immediate ="true"   
+                                              disabled="#{mT_EquipmentTypeDetailController.editingMode}">                                                                               
+                            </p:commandButton>
+                        </p:column>
+
+                        <p:column  id="deleteRow"
+                                   style="font-family:Arial Black;
+                                   text-align: center;
+                                   font-size: 12px;
+                                   width: 70px;    
+                                   overflow: hidden"
+                                   headerText="DEL ROW"                                       
+                                   >
+                            <p:commandButton  id="deleteButton" icon="fa fa-trash" 
+                                              actionListener="#{mT_EquipmentTypeDetailController.deleteRow()}"
+                                              immediate="true"       
+                                              onclick="PF('confirmDialog').show()"
+                                              rendered ="#{(rowIndex +1) eq mT_EquipmentTypeDetailController.dataList.size()}"
+                                              disabled="#{mT_EquipmentTypeDetailController.editingMode}"
+                                              oncomplete="if(!args.validationFailed) {updateTable();}"
+                                              > 
+                            </p:commandButton>
+                        </p:column>
+                        <p:column id="editRow" 
+                                  style="font-family:Arial Black;
+                                  text-align: center;
+                                  font-size: 12px;
+                                  width: 70px;    
+                                  overflow: hidden"
+                                  headerText="EDIT ROW"                                                                                                        
+                                  >
+                            <p:rowEditor  id="editButton" >                               
+                            </p:rowEditor>                 
+                        </p:column>
+
+                        <!-- DATA -->
+                        <p:column id="equipmentTypeIdColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 70px;    
+                                  overflow: hidden;
+                                  visibility: hidden"
+                                  headerText="#{tables.MT_EQUIPMENT_TYPE_EQUIPMENT_TYPE_ID}"                                       
+                                  rendered="false" >
+                            <h:outputText id="equipmentTypeIdOutput" value="#{data.equipmentTypeId}" />
+                        </p:column>    
+                        <p:column id="entityTypeIdColumn"                                  
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"                                  
+                                  headerText="#{tables.MT_EQUIPMENT_TYPE_ENTITY_TYPE_CODE}" 
+                                  rendered="true"
+                                  filterBy="#{data.entityTypeId}"
+                                  filterMatchMode="exact"
+                                  >                             
+                            <f:facet id="filterEntityType" name="filter" >  
+                                <p:selectOneMenu id="filterMenuEntityType" 
+                                                 onchange="PF('filteredTable').filter()" >
+                                    <f:selectItem id="filterSelectItemEntityType" 
+                                                  itemLabel="[ALL ENTITIES]" itemValue="#{null}"
+                                                  noSelectionOption="true" />
+                                    <f:selectItems id="filterSelectItemsEntityType" 
+                                                   value="#{mT_EquipmentTypeDetailController.populateEntityTypeMenu()}" />
+                                </p:selectOneMenu>
+                            </f:facet>
+                            <p:cellEditor id="entityTypeCellEditor">
+                                <f:facet id="entityTypeOutputFacet" name="output">  
+                                    <p:selectOneMenu id="entityTypeMenuOutput" 
+                                                     disabled="true"
+                                                     immediate="true"
+                                                     value="#{data.entityTypeId}"
+                                                     >                                         
+                                        <f:selectItems  id="selectItemsEntityTypeIdOutput"
+                                                        value="#{mT_EquipmentTypeDetailController.populateEntityTypeMenu()}"       
+                                                        itemDisabled="true"
+                                                        var="Entity Type"                                                       
+                                                        itemValue="#{data.entityTypeId}"
+                                                        />     
+                                    </p:selectOneMenu>
+                                </f:facet>
+                                <f:facet id="entityTypeInputFacet" name="input">  
+                                    <p:selectOneMenu id="entityTypeMenuInput" 
+                                                     immediate="true"
+                                                     value="#{data.entityTypeId}"
+                                                     >                                         
+                                        <f:selectItems  id="selectItemsEntityTypeIdInput"
+                                                        value="#{mT_EquipmentTypeDetailController.populateEntityTypeMenu()}"       
+                                                        var="Entity Type"                                                       
+                                                        itemValue="#{data.entityTypeId}"
+                                                        />    
+                                        <f:param id="currentRowEntityType" name="currentRow" value="#{rowIndex}" />
+                                        <p:ajax event="change" immediate="true"   update="entityTypeMenuOutput"   />
+                                    </p:selectOneMenu>
+                                </f:facet>
+                            </p:cellEditor>
+                        </p:column> 
+
+                        <p:column id="equipmentTypeCodeColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_EQUIPMENT_TYPE_EQUIPMENT_TYPE_CODE}"                                        
+                                  rendered="true"
+                                  filterBy="#{data.equipmentTypeCode}"  
+                                  filterMatchMode="contains"
+                                  >               
+                            <p:cellEditor id="equipmentTypeCodeCellEditor" >
+                                <f:facet id="equipmentTypeCodeOutputFacet" name="output">  
+                                    <h:outputText id="equipmentTypeCodeOutput" value="#{data.equipmentTypeCode}"/>  
+                                </f:facet>
+                                <f:facet id="equipmentTypeCodeInputFacet" name="input">  
+                                    <p:inputText id="equipmentTypeCodeInput" value="#{data.equipmentTypeCode}" 
+                                                 style="width:96%"
+                                                 required="true" requiredMessage="User Name can't be null">  >                                         
+                                        <p:ajax event="change" update="equipmentTypeCodeOutput" />
+                                    </p:inputText>
+                                </f:facet>  
+                            </p:cellEditor>
+                        </p:column>
+
+                        <p:column id="descriptionColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_EQUIPMENT_TYPE_DESCRIPTION}" 
+                                  rendered="true" 
+                                  filterBy="#{data.description}"  
+                                  filterMatchMode="contains"
+                                  >         
+                            <p:cellEditor id="descriptionCellEditor">
+                                <f:facet id="descriptionOutputFacet" name="output">  
+                                    <h:outputText id="descriptionOutput" value="#{data.description}"/>  
+                                </f:facet>
+                                <f:facet id="descriptionInputFacet" name="input">  
+                                    <p:inputText id="descriptionInput" value="#{data.description}" 
+                                                 style="width:96%"
+                                                 required="true" requiredMessage="User Name can't be null">  >                                         
+                                        <p:ajax event="change" update="descriptionOutput" />
+                                    </p:inputText>
+                                </f:facet>  
+                            </p:cellEditor>
+                        </p:column>
+
+                        <p:column id="startDateColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_EQUIPMENT_TYPE_START_DATE}" 
+                                  rendered="true" 
+                                  filterBy="#{data.startDate}"  
+                                  filterFunction="#{mT_EquipmentTypeDetailController.filterByStartDateController}"
+                                  >              
+                            <f:facet id="startDateFilter" name="filter">
+                                <h:inputHidden id="startDateFilterHidden" />
+                            </f:facet>
+                            <f:facet id="headerFilterStartDate" name="header">   
+                                <h:outputText value="#{tables.MT_EQUIPMENT_TYPE_START_DATE}" />
+                                <br />
+                                <p:calendar id="fromStartDate" size="10"  
+                                            mindate="01/01/1900" maxdate="31/12/9999"
+                                            navigator="false"  title="date format dd/mm/yyyy"   
+                                            showOn="false"           
+                                            value="#{mT_EquipmentTypeDetailController.fromDate_SD}"
+                                            onchange="PF('filteredTable').filter()"
+                                            pattern="dd/MM/yyyy" mask="true" timeOnly="false"
+                                            >                                                                          
+                                    <f:converter id="converterFromStartDate" converterId="timestampShortConverter" /> 
+                                </p:calendar>
+                                <p:calendar id="toStartDate" size="10"  
+                                            mindate="01/01/1900" maxdate="31/12/9999"
+                                            navigator="false"  title="date format dd/mm/yyyy"   
+                                            showOn="false"                                                   
+                                            value="#{mT_EquipmentTypeDetailController.toDate_SD}" 
+                                            onchange="PF('filteredTable').filter()"
+                                            pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                            >                                   
+                                    <f:converter id="converterToStartDate" converterId="timestampShortConverter" /> 
+                                </p:calendar>
+                            </f:facet>
+                            <p:cellEditor id="startDateCellEditor">
+                                <f:facet id="startDateOutputFacet" name="output">  
+                                    <p:calendar id="startDateOutput" disabled="true" size="10"  
+                                                navigator="false"  title="date format dd/mm/yyyy"   
+                                                showOn="false"                                                   
+                                                value="#{data.startDate}" 
+                                                pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                                immediate="true" >
+                                        <f:converter id="converterStartDateOutput" converterId="timestampShortConverter" /> 
+                                    </p:calendar>          
+                                </f:facet>
+                                <f:facet id="startDateInputFacet" name="input">  
+                                    <p:calendar id="startDateInput" size="10"
+                                                mindate="01/01/1900" maxdate="31/12/9999"
+                                                navigator="false"  title="date format dd/mm/yyyy"   showOn="false"                                                    
+                                                value="#{data.startDate}" 
+                                                pattern="dd/MM/yyyy" mask="true" timeOnly="false"
+                                                immediate="true"                                                    
+                                                >
+                                        <f:convertDateTime pattern="dd/MM/yyyy" />
+                                        <f:converter id="converterStartDateInput" converterId="timestampShortConverter" />
+                                        <f:validator validatorId="startDateValidator"/>
+                                        <p:ajax event="change" update="startDateOutput" />      
+                                    </p:calendar>                                              
+                                </f:facet>        
+                            </p:cellEditor>
+                        </p:column> 
+
+                        <p:column id="endDateColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_EQUIPMENT_TYPE_END_DATE}" 
+                                  rendered="true" 
+                                  filterBy="#{data.endDate}"  
+                                  filterFunction="#{mT_EquipmentTypeDetailController.filterByEndDateController}"
+                                  >              
+                            <f:facet id="endDateFilter" name="filter">
+                                <h:inputHidden id="endDateFilterHidden" />
+                            </f:facet>
+                            <f:facet id="headerFilterEndDate" name="header">   
+                                <h:outputText value="#{tables.MT_EQUIPMENT_TYPE_END_DATE}" />
+                                <br />
+                                <p:calendar id="fromEndDate" size="10"  
+                                            mindate="01/01/1900" maxdate="31/12/9999"
+                                            navigator="false"  title="date format dd/mm/yyyy"   
+                                            showOn="false"           
+                                            value="#{mT_EquipmentTypeDetailController.fromDate_ED}"
+                                            onchange="PF('filteredTable').filter()"
+                                            pattern="dd/MM/yyyy" mask="true" timeOnly="false"
+                                            >                                                                          
+                                    <f:converter id="converterFromEndDate" converterId="timestampShortConverter" /> 
+                                </p:calendar>
+                                <p:calendar id="toEndDate" size="10"  
+                                            mindate="01/01/1900" maxdate="31/12/9999"
+                                            navigator="false"  title="date format dd/mm/yyyy"   
+                                            showOn="false"                                                   
+                                            value="#{mT_EquipmentTypeDetailController.toDate_ED}" 
+                                            onchange="PF('filteredTable').filter()"
+                                            pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                            >                                   
+                                    <f:converter id="converterToEndDate" converterId="timestampShortConverter" /> 
+                                </p:calendar>
+                            </f:facet>
+                            <p:cellEditor id="endDateCellEditor">
+                                <f:facet id="endDateOutputFacet" name="output">  
+                                     <p:calendar id="endDateOutput" disabled="true" size="10"  
+                                                navigator="false"  title="date format dd/mm/yyyy"   
+                                                showOn="false"                                                   
+                                                value="#{data.endDate}" 
+                                                pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                                immediate="true" >
+                                        <f:converter id="converterEndDateOutput" converterId="timestampShortConverter" /> 
+                                    </p:calendar>
+                                </f:facet>
+                                <f:facet id="endDateInputFacet" name="input">  
+                                    <p:calendar id="endDateInput" size="10"
+                                                mindate="01/01/1900" maxdate="31/12/9999"
+                                                navigator="false"  title="date format dd/mm/yyyy"   showOn="false"                                                    
+                                                value="#{data.endDate}" 
+                                                pattern="dd/MM/yyyy" mask="true" timeOnly="false"
+                                                immediate="true"                                                    
+                                                >
+                                        <f:convertDateTime pattern="dd/MM/yyyy" />
+                                        <f:converter id="converterEndDateInput" converterId="timestampShortConverter" />
+                                        <f:validator validatorId="endDateValidator"/>
+                                        <p:ajax event="change" update="endDateOutput" />      
+                                    </p:calendar>                                              
+                                </f:facet>        
+                            </p:cellEditor>
+                        </p:column> 
+
+                        <p:column id="statusIdColumn"                                  
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 250px;    
+                                  overflow: hidden"                                  
+                                  headerText="#{tables.MT_EQUIPMENT_TYPE_STATUS_CODE}" 
+                                  rendered="true"
+                                  filterBy="#{data.statusId}"
+                                  filterMatchMode="exact">                             
+                            <f:facet id="filterStatus" name="filter" >  
+                                <p:selectOneMenu id="filterMenuStatus" 
+                                                 onchange="PF('filteredTable').filter()" >
+                                    <f:selectItem id="filterSelectItemStatus" 
+                                                  itemLabel="[ALL STATUS]" 
+                                                  itemValue="#{null}" 
+                                                  noSelectionOption="true" />
+                                    <f:selectItems id="filterSelectItemsStatus" 
+                                                   value="#{mT_EquipmentTypeDetailController.populateStatusMenuForEquipmentType()}" />
+                                </p:selectOneMenu>
+                            </f:facet>
+                            <p:cellEditor id="statusIdCellEditor">
+                                <f:facet id="statusIdOutputFacet" name="output">  
+                                    <p:selectOneMenu id="statusOutput" 
+                                                     editable="false" disabled="true"
+                                                     immediate="true"
+                                                     value="#{data.statusId}">                                         
+                                        <f:selectItems value="#{mT_EquipmentTypeDetailController.populateStatusMenuForEquipmentType()}"       
+                                                       id="selectItemsStatusOutput"
+                                                       itemDisabled="true"
+                                                       var="Status"                                                       
+                                                       itemValue="#{data.statusId}"
+                                                       />                                            
+                                    </p:selectOneMenu>    
+                                </f:facet>  
+                                <f:facet id="statusIdInputFacet" name="input">  
+                                    <p:selectOneMenu id="statusInput" value="#{data.statusId}"                                                       
+                                                     immediate="true"                                                     
+                                                     valueChangeListener="#{mT_EquipmentTypeDetailController.changeStatus}">                                                
+                                        <f:selectItems value="#{mT_EquipmentTypeDetailController.populateStatusMenuForEquipmentType()}"
+                                                       id="selectItemsStatusInput"
+                                                       var="Status" 
+                                                       itemValue="#{data.statusId}" >
+
+                                        </f:selectItems>
+                                        <f:param id="currentRowStatus" name="currentRow" value="#{rowIndex}" />
+                                        <p:ajax event="change" immediate="true"   update="statusOutput"   />                                        
+                                    </p:selectOneMenu>
+                                </f:facet>  
+                            </p:cellEditor>
+                        </p:column>  
+
+                        <p:column id="businessScopeIdColumn"                                  
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"                                  
+                                  headerText="#{tables.MT_EQUIPMENT_TYPE_BUSINESS_SCOPE_CODE}" 
+                                  rendered="true"
+                                  filterBy="#{data.businessScopeId}"
+                                  filterMatchMode="exact">                             
+                            <f:facet id="filterBusinessScope" name="filter" >  
+                                <p:selectOneMenu id="filterMenuBusinessScope" 
+                                                 onchange="PF('filteredTable').filter()" >
+                                    <f:selectItem id="filterSelectItemBusinessScope" 
+                                                  itemLabel="[ALL BUSINESS SCOPES]" 
+                                                  itemValue="#{null}" 
+                                                  noSelectionOption="true" />
+                                    <f:selectItems id="filterSelectItemsBusinessScope" 
+                                                   value="#{mT_EquipmentTypeDetailController.populateBusinessScopeMenu()}" />
+                                </p:selectOneMenu>
+                            </f:facet>
+                            <p:cellEditor id="businessScopeIdCellEditor">
+                                <f:facet id="businessScopeIdOutputFacet" name="output">  
+                                    <p:selectOneMenu id="businessScopeOutput" 
+                                                     editable="false" disabled="true"
+                                                     immediate="true"
+                                                     value="#{data.businessScopeId}">                                         
+                                        <f:selectItems value="#{mT_EquipmentTypeDetailController.populateBusinessScopeMenu()}"       
+                                                       id="selectItemsBusinessScopeOutput"
+                                                       itemDisabled="true"
+                                                       var="BusinessScope"                                                       
+                                                       itemValue="#{data.businessScopeId}"
+                                                       />                                            
+                                    </p:selectOneMenu>    
+                                </f:facet>  
+                                <f:facet id="businessScopeIdInputFacet" name="input">  
+                                    <p:selectOneMenu id="businessScopeInput" value="#{data.businessScopeId}"                                                       
+                                                     immediate="true"                                                     
+                                                     >                                                
+                                        <f:selectItems value="#{mT_EquipmentTypeDetailController.populateBusinessScopeMenu()}"
+                                                       id="selectItemsBusinessScopeInput"
+                                                       var="BusinessScope" 
+                                                       itemValue="#{data.businessScopeId}" >
+
+                                        </f:selectItems>
+                                        <f:param id="currentRowBusinessScope" name="currentRow" value="#{rowIndex}" />
+                                        <p:ajax event="change" immediate="true"   update="businessScopeOutput"   />                                        
+                                    </p:selectOneMenu>
+                                </f:facet>  
+                            </p:cellEditor>
+                        </p:column> 
+
+                        <p:column id="businessTechnologyIdColumn"                                  
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 220px;    
+                                  overflow: hidden"                                  
+                                  headerText="#{tables.MT_EQUIPMENT_TYPE_TECHNOLOGY_SCOPE_CODE}" 
+                                  rendered="true"
+                                  filterBy="#{data.technologyScopeId}"
+                                  filterMatchMode="exact">                             
+                            <f:facet id="filterTechnologyScope" name="filter" >  
+                                <p:selectOneMenu id="filterMenuTechnologyScope" 
+                                                 onchange="PF('filteredTable').filter()" >
+                                    <f:selectItem id="filterSelectItemTechnologyScope" 
+                                                  itemLabel="[ALL TECHNOLOGY SCOPES]" 
+                                                  itemValue="#{null}" 
+                                                  noSelectionOption="true" />
+                                    <f:selectItems id="filterSelectItemsTechnologyScope" 
+                                                   value="#{mT_EquipmentTypeController.populateTechnologyScopeMenu()}" />
+                                </p:selectOneMenu>
+                            </f:facet>
+                            <p:cellEditor id="technologyScopeIdCellEditor">
+                                <f:facet id="technologyScopeIdOutputFacet" name="output">  
+                                    <p:selectOneMenu id="technologyScopeOutput" 
+                                                     editable="false" disabled="true"
+                                                     immediate="true"
+                                                     value="#{data.technologyScopeId}">                                         
+                                        <f:selectItems value="#{mT_EquipmentTypeDetailController.populateTechnologyScopeMenu()}"       
+                                                       id="selectItemsTechnologyScopeOutput"
+                                                       itemDisabled="true"
+                                                       var="TechnologyScope"                                                       
+                                                       itemValue="#{data.technologyScopeId}"
+                                                       />                                            
+                                    </p:selectOneMenu>    
+                                </f:facet>  
+                                <f:facet id="technologyScopeIdInputFacet" name="input">  
+                                    <p:selectOneMenu id="technologyScopeInput" value="#{data.technologyScopeId}"                                                       
+                                                     immediate="true"                                                     
+                                                     >                                                
+                                        <f:selectItems value="#{mT_EquipmentTypeDetailController.populateTechnologyScopeMenu()}"
+                                                       id="selectItemsTechnologyScopeInput"
+                                                       var="TechnologyScope" 
+                                                       itemValue="#{data.technologyScopeId}" >
+
+                                        </f:selectItems>
+                                        <f:param id="currentRowTechnologyScope" name="currentRow" value="#{rowIndex}" />
+                                        <p:ajax event="change" immediate="true"   update="technologyScopeOutput"   />                                        
+                                    </p:selectOneMenu>
+                                </f:facet>  
+                            </p:cellEditor>
+                        </p:column>
+
+                        <p:column id="inputDateColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_EQUIPMENT_TYPE_INPUT_DATE}" 
+                                  rendered="true" 
+                                  filterBy="#{data.inputDate}"  
+                                  filterFunction="#{mT_EquipmentTypeDetailController.filterByInputDateController}"
+                                  >              
+                            <f:facet id="inputDateFilter" name="filter">
+                                <h:inputHidden id="inputDateFilterHidden" />
+                            </f:facet>
+                            <f:facet id="headerFilterInputDate" name="header">   
+                                <h:outputText value="#{tables.MT_EQUIPMENT_TYPE_INPUT_DATE}" />
+                                <br />
+                                <p:calendar id="fromInputDate" size="10"  
+                                            mindate="01/01/1900" maxdate="31/12/9999"
+                                            navigator="false"  title="date format dd/mm/yyyy"   
+                                            showOn="false"           
+                                            value="#{mT_EquipmentTypeDetailController.fromDate_ID}"
+                                            onchange="PF('filteredTable').filter()"
+                                            pattern="dd/MM/yyyy" mask="true" timeOnly="false"
+                                            >                                                                          
+                                    <f:converter id="converterFromInputDate" converterId="timestampShortConverter" /> 
+                                </p:calendar>
+                                <p:calendar id="toInputDate" size="10"  
+                                            mindate="01/01/1900" maxdate="31/12/9999"
+                                            navigator="false"  title="date format dd/mm/yyyy"   
+                                            showOn="false"                                                   
+                                            value="#{mT_EquipmentTypeDetailController.toDate_ID}" 
+                                            onchange="PF('filteredTable').filter()"
+                                            pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                            >                                   
+                                    <f:converter id="converterToInputDate" converterId="timestampShortConverter" /> 
+                                </p:calendar>
+                            </f:facet>
+                            <p:cellEditor id="inputDateCellEditor">
+                                <f:facet id="inputDateOutputFacet" name="output">  
+                                     <p:calendar id="inputDateOutput" disabled="true" size="10"  
+                                                navigator="false"  title="date format dd/mm/yyyy"   
+                                                showOn="false"                                                   
+                                                value="#{data.startDate}" 
+                                                pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                                immediate="true" >
+                                        <f:converter id="converterInputDateOutput" converterId="timestampShortConverter" /> 
+                                    </p:calendar>     
+                                </f:facet>
+                                <f:facet id="inputDateInputFacet" name="input">  
+                                    <p:calendar id="inputDateInput" size="19"
+                                                mindate="01/01/1900" maxdate="31/12/9999"
+                                                navigator="false"  title="date format dd/mm/yyyy"   showOn="false"                                                    
+                                                value="#{data.inputDate}" 
+                                                pattern="dd/MM/yyyy HH:mm:ss" mask="true" timeOnly="false"
+                                                immediate="true"                                                    
+                                                >
+                                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
+                                        <f:converter id="converterInputDateInput" converterId="timestampLongConverter" />
+                                        <p:ajax event="change" update="inputDateOutput" />      
+                                    </p:calendar>                                              
+                                </f:facet>        
+                            </p:cellEditor>                          
+                        </p:column> 
+
+                        <p:column id="inputUserColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 100px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_EQUIPMENT_TYPE_INPUT_USER}"                                        
+                                  rendered="true"
+                                  filterBy="#{data.inputUser}"  
+                                  filterMatchMode="contains"
+                                  >                
+                            <p:cellEditor id="inputUserCellEditor">
+                                <f:facet id="inputUserOutputFacet" name="output">  
+                                    <h:outputText id="inputUserOutput" value="#{data.inputUser}"/>  
+                                </f:facet>
+                                <f:facet id="inputUserInputFacet" name="input">  
+                                    <p:inputText id="inputUserInput" value="#{data.inputUser}" 
+                                                 style="width:96%"
+                                                 >                                         
+                                        <p:ajax event="change" update="inputUserOutput" />
+                                    </p:inputText>
+                                </f:facet>  
+                            </p:cellEditor>
+                        </p:column>
+
+                        <p:column id="modifDateColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_EQUIPMENT_TYPE_MODIF_DATE}" 
+                                  rendered="true" 
+                                  filterBy="#{data.modifDate}"  
+                                  filterFunction="#{mT_EquipmentTypeDetailController.filterByModifDateController}"
+                                  >              
+                            <f:facet id="modifDateFilter" name="filter">
+                                <h:inputHidden id="modifDateFilterHidden" />
+                            </f:facet>
+                            <f:facet id="headerFilterModifDate" name="header">   
+                                <h:outputText value="#{tables.MT_EQUIPMENT_TYPE_MODIF_DATE}" />
+                                <br />
+                                <p:calendar id="fromModifDate" size="10"  
+                                            mindate="01/01/1900" maxdate="31/12/9999"
+                                            navigator="false"  title="date format dd/mm/yyyy"   
+                                            showOn="false"           
+                                            value="#{mT_EquipmentTypeDetailController.fromDate_MD}"
+                                            onchange="PF('filteredTable').filter()"
+                                            pattern="dd/MM/yyyy" mask="true" timeOnly="false"
+                                            >                                                                          
+                                    <f:converter id="converterFromModifDate" converterId="timestampShortConverter" /> 
+                                </p:calendar>
+                                <p:calendar id="toModifDate" size="10"  
+                                            mindate="01/01/1900" maxdate="31/12/9999"
+                                            navigator="false"  title="date format dd/mm/yyyy"   
+                                            showOn="false"                                                   
+                                            value="#{mT_EquipmentTypeDetailController.toDate_MD}" 
+                                            onchange="PF('filteredTable').filter()"
+                                            pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                            >                                   
+                                    <f:converter id="converterToModifDate" converterId="timestampShortConverter" /> 
+                                </p:calendar>
+                            </f:facet>
+                            <p:cellEditor id="modifDateCellEditor">
+                                <f:facet id="modifDateOutputFacet" name="output">  
+                                     <p:calendar id="modifDateOutput" disabled="true" size="10"  
+                                                navigator="false"  title="date format dd/mm/yyyy"   
+                                                showOn="false"                                                   
+                                                value="#{data.startDate}" 
+                                                pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                                immediate="true" >
+                                        <f:converter id="converterModifDateOutput" converterId="timestampShortConverter" /> 
+                                    </p:calendar>      
+                                </f:facet>
+                                <f:facet id="modifDateInputFacet" name="input">  
+                                    <p:calendar id="modifDateInput" size="19"
+                                                mindate="01/01/1900" maxdate="31/12/9999"
+                                                navigator="false"  title="date format dd/mm/yyyy"   showOn="false"                                                    
+                                                value="#{data.modifDate}" 
+                                                pattern="dd/MM/yyyy HH:mm:ss" mask="true" timeOnly="false"
+                                                immediate="true"                                                    
+                                                >
+                                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
+                                        <f:converter id="converterModifDateInput" converterId="timestampLongConverter" />
+                                        <p:ajax event="change" update="modifDateOutput" />      
+                                    </p:calendar>                                              
+                                </f:facet>        
+                            </p:cellEditor>                          
+                        </p:column> 
+
+                        <p:column id="modifUserColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 100px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_EQUIPMENT_TYPE_MODIF_USER}"                                        
+                                  rendered="true"
+                                  filterBy="#{data.modifUser}"  
+                                  filterMatchMode="contains"
+                                  >                
+                            <p:cellEditor id="modifUserCellEditor">
+                                <f:facet id="modifUserOutputFacet" name="output">  
+                                    <h:outputText id="modifUserOutput" value="#{data.modifUser}"/>  
+                                </f:facet>
+                                <f:facet id="modifUserInputFacet" name="input">  
+                                    <p:inputText id="modifUserInput" value="#{data.modifUser}" 
+                                                 style="width:96%"
+                                                 >                                         
+                                        <p:ajax event="change" update="modifUserOutput" />
+                                    </p:inputText>
+                                </f:facet>  
+                            </p:cellEditor>
+                        </p:column>
+
+                    </p:dataTable>
+
+                    <!-- General confirm dialog -->	
+                    <p:confirmDialog global="true" 
+                                     styleClass="change-position" 
+                                     widgetVar="confirmDialog">
+                        <p:commandButton value="#{properties.L_OK}" 
+                                         type="button" 
+                                         styleClass="ui-confirmdialog-yes" 
+                                         oncomplete="PF('confirmDialog').hide()"                                         
+                                         icon="#{properties.I_OK}"/>
+                        <p:commandButton value="#{properties.L_CANCEL}" 
+                                         type="button" 
+                                         styleClass="ui-confirmdialog-no" 
+                                         oncomplete="PF('confirmDialog').hide()"                                         
+                                         icon="#{properties.I_CANCEL}"/>
+                    </p:confirmDialog>
+
+
+                    <!-- Confirm dialog to cancel records -->	
+                    <p:confirmDialog  header="CANCEL RECORD"
+                                      id="CancelDialog"
+                                      widgetVar="confirmCancelDialog"
+                                      global="true"
+                                      message="The cancellation will affect both this record and future records. Do you want to continue with the cancellation?"
+                                      >
+
+                        <p:commandButton value="#{properties.L_OK}" 
+                                         styleClass="ui-confirmdialog-yes"                                          
+                                         actionListener="#{mT_EquipmentTypeDetailController.cancelStatusOK()}"
+                                         process="@this"                                                 
+                                         oncomplete="PF('confirmCancelDialog').hide()"
+                                         icon="#{properties.I_OK}"/>
+                        <p:commandButton value="#{properties.L_CANCEL}"
+                                         styleClass="ui-confirmdialog-yes"                                          
+                                         actionListener="#{mT_EquipmentTypeDetailController.cancelStatusKO()}"
+                                         process="@this"
+                                         oncomplete="PF('confirmCancelDialog').hide()"
+                                         icon="#{properties.I_CANCEL}"/>
+
+                    </p:confirmDialog>
+
+
+                    <p></p>
+                    <p:commandButton id="return" value="Return to previous page" icon="#{properties.F_I_RETURN}" action="#{mT_EquipmentTypeDetailController.previousPage}">
+                    </p:commandButton>
+                </h:form>
+            </ui:define>
+        </ui:composition>
+    </h:body>
+</html>

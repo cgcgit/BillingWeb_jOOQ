@@ -1,0 +1,678 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    <f:metadata>          
+        <f:viewAction id="defaultControlVariables" action="#{mT_ServiceTypeController.defaultValueControlVariablesIni()}" phase="INVOKE_APPLICATION" >
+        </f:viewAction>   
+        <f:viewAction id="loadData" action="#{mT_ServiceTypeController.loadDataList()}" phase="INVOKE_APPLICATION" >
+        </f:viewAction> 
+    </f:metadata>
+
+    <h:body>        
+
+        <ui:composition id="mainTemplate" template="./../resources/templates/mainTemplate.xhtml">
+            <ui:define id="title" name="title">#{pages.T_CATALOG_SERVICE_TYPE} </ui:define>
+            <ui:define id="content" name="content">   
+                <h:form id="form"  >  
+
+                    <h:panelGrid id="searchDatePanel" columns="3" cellpadding="5">
+                        <h:outputText id="searchDateText" value="Search date:" />
+                        <p:calendar id="searchDate" size="10"                                              
+                                    navigator="false"  title="date format dd/mm/yyyy"   
+                                    showOn="false"           
+                                    value="#{mT_ServiceTypeController.searchDate}"                                            
+                                    pattern="dd/MM/yyyy" mask="true" timeOnly="false"
+                                    >                                                                          
+                            <f:converter id="converterSearchDate" converterId="timestampShortConverter" /> 
+                        </p:calendar>
+                        <p:commandButton id="seachButton" 
+                                         icon="#{properties.I_SEARCH}" 
+                                         actionListener="#{mT_ServiceTypeController.loadDataList()}"
+                                         update=":form:table"                                                 
+                                         > 
+                            <f:param id="currentRow" name="currentRow" value="#{rowIndex}" />
+                        </p:commandButton>
+
+                    </h:panelGrid>
+
+
+                    <p:growl id="messageGrowl"  showDetail="true" autoUpdate="true"  />                     
+                    <p:dataTable id="table" var="data" 
+                                 value="#{mT_ServiceTypeController.dataList}"                                     
+                                 emptyMessage="Any service type for this criteria"
+                                 resizableColumns="true" 
+                                 scrollable="true"  scrollWidth="100%" 
+                                 paginator="true"                                      
+                                 tableStyle="table-layout:fixed;width:100%;"
+                                 rows="10"     
+                                 editable="true"  
+                                 rowIndexVar="rowIndex"  
+                                 widgetVar="filteredTable"
+                                 filteredValue="#{mT_ServiceTypeController.filteredDataList}"
+                                 selection="#{mT_ServiceTypeController.selectedData}">                            
+
+                        <f:facet id="facetHeader" name="header">  
+                            Service Types
+                            <p>
+                                <p:commandButton id="createButton" 
+                                                 value="New Service Type"
+                                                 title="Create a new service type" 
+                                                 action="#{mT_ServiceTypeController.pushNewButton()}" 
+                                                 update=":form:createDialogPanelData"
+                                                 rendered="#{mT_ServiceTypeController.canUserEditModify()}"
+                                                 process="@this"> 
+                                </p:commandButton>
+                            </p>                            
+
+                        </f:facet>  
+                        <f:facet id="facetFooter" name="footer">                                 
+                        </f:facet> 
+
+                        <!-- OPTIONS -->
+                        <p:column id="detailColumn"
+                                  headerText="DETAIL" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 50px;    
+                                  overflow: hidden"    >
+                            <p:button id="detailButton"
+                                      icon="#{properties.I_SEARCH}" 
+                                      title="Detail" 
+                                      outcome="#{pages.SERVICE_TYPE_DETAIL_PAGE}"> 
+                                <f:param id="serviceTypeIdSearch" 
+                                         name="serviceTypeId" 
+                                         value=" #{data.serviceTypeId}">                                  
+                                </f:param>
+                                <f:param id="currentPage" 
+                                         name="previousPage" 
+                                         value="#{mT_ServiceTypeController.currentPage}">                                  
+                                </f:param>
+                            </p:button>
+                        </p:column>	  
+
+
+                        <!-- DATA TABLE -->
+                        <p:column id="serviceTypeIdColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 70px;    
+                                  overflow: hidden;
+                                  visibility: hidden"
+                                  headerText="#{tables.MT_SERVICE_TYPE_SERVICE_TYPE_ID}"                                       
+                                  rendered="false" >
+                            <h:outputText id="serviceTypeId" value="#{data.serviceTypeId}" />
+                        </p:column>    
+
+
+                        <p:column id="entityTypeIdColumn"                                  
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"                                  
+                                  headerText="#{tables.MT_SERVICE_TYPE_ENTITY_TYPE_CODE}" 
+                                  rendered="false"
+                                  filterBy="#{data.entityTypeId}"
+                                  filterMatchMode="exact"
+                                  >                             
+                            <f:facet id="filterEntityType" name="filter" >  
+                                <p:selectOneMenu id="filterMenuEntityType" 
+                                                 onchange="PF('filteredTable').filter()" >
+                                    <f:selectItem id="filterSelectItemEntityType" 
+                                                  itemLabel="[ALL ENTITIES]" itemValue="#{null}"
+                                                  noSelectionOption="true" />
+                                    <f:selectItems id="filterSelectItemsEntityType" 
+                                                   value="#{mT_ServiceTypeController.populateEntityTypeMenu()}" />
+                                </p:selectOneMenu>
+                            </f:facet>
+                            <p:selectOneMenu id="entityTypeMenu" 
+                                             disabled="true"
+                                             immediate="true"
+                                             value="#{data.entityTypeId}"
+                                             >                                         
+                                <f:selectItems  id="selectItemsEntityTypeId"
+                                                value="#{mT_ServiceTypeController.populateEntityTypeMenu()}"       
+                                                itemDisabled="true"
+                                                var="selectedEntityTypeOutput"                                                       
+                                                itemValue="#{data.entityTypeId}"
+                                                />     
+                            </p:selectOneMenu>
+                        </p:column>  
+
+                        <p:column id="serviceTypeCodeColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_SERVICE_TYPE_SERVICE_TYPE_CODE}"                                        
+                                  rendered="true"
+                                  filterBy="#{data.serviceTypeCode}"  
+                                  filterMatchMode="contains"
+                                  >                
+                            <h:outputText id="serviceTypeCode" value="#{data.serviceTypeCode}"/>  
+                        </p:column>
+
+
+                        <p:column id="descriptionColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_SERVICE_TYPE_DESCRIPTION}" 
+                                  rendered="true" 
+                                  filterBy="#{data.description}"  
+                                  filterMatchMode="contains"
+                                  >                          
+                            <h:outputText id="description" value="#{data.description}"/>  
+                        </p:column>
+
+                        <p:column id="startDateColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_SERVICE_TYPE_START_DATE}" 
+                                  rendered="true" 
+                                  filterBy="#{data.startDate}"  
+                                  filterFunction="#{mT_ServiceTypeController.filterByStartDateController}"
+                                  >              
+                            <f:facet id="startDateFilter" name="filter">
+                                <h:inputHidden id="startDateFilterHidden" />
+                            </f:facet>
+                            <f:facet id="headerFilterStartDate" name="header">   
+                                <h:outputText value="#{tables.MT_SERVICE_TYPE_START_DATE}" />
+                                <br />
+                                <p:calendar id="fromStartDate" size="10"  
+                                            navigator="false"  title="date format dd/mm/yyyy"   
+                                            showOn="false"           
+                                            value="#{mT_ServiceTypeController.fromDate_SD}"
+                                            onchange="PF('filteredTable').filter()"
+                                            pattern="dd/MM/yyyy" mask="true" timeOnly="false"
+                                            >                                                                          
+                                    <f:converter id="converterFromStartDate" converterId="timestampShortConverter" /> 
+                                </p:calendar>
+                                <p:calendar id="toStartDate" size="10"  
+                                            navigator="false"  title="date format dd/mm/yyyy"   
+                                            showOn="false"                                                   
+                                            value="#{mT_ServiceTypeController.toDate_SD}" 
+                                            onchange="PF('filteredTable').filter()"
+                                            pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                            >                                   
+                                    <f:converter id="converterToStartDate" converterId="timestampShortConverter" /> 
+                                </p:calendar>
+                            </f:facet>
+                            <p:calendar id="startDate" disabled="true" size="10"  
+                                        navigator="false"  title="date format dd/mm/yyyy"   
+                                        showOn="false"                                                   
+                                        value="#{data.startDate}" 
+                                        pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                        immediate="true" >
+                                <f:converter id="converterStartDate" converterId="timestampShortConverter" /> 
+                            </p:calendar>                       
+                        </p:column> 
+
+
+                        <p:column id="endDateColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_SERVICE_TYPE_END_DATE}" 
+                                  rendered="true" 
+                                  filterBy="#{data.endDate}"  
+                                  filterFunction="#{mT_ServiceTypeController.filterByEndDateController}"
+                                  >              
+                            <f:facet id="endDateFilter" name="filter">
+                                <h:inputHidden id="endDateFilterHidden" />
+                            </f:facet>
+                            <f:facet id="headerFilterEndDate" name="header">   
+                                <h:outputText value="#{tables.MT_SERVICE_TYPE_END_DATE}" />
+                                <br />
+                                <p:calendar id="fromEndDate" size="10"  
+                                            mindate="01/01/1900" maxdate="31/12/9999"
+                                            navigator="false"  title="date format dd/mm/yyyy"   
+                                            showOn="false"           
+                                            value="#{mT_ServiceTypeController.fromDate_ED}"
+                                            onchange="PF('filteredTable').filter()"
+                                            pattern="dd/MM/yyyy" mask="true" timeOnly="false"
+                                            >                                                                          
+                                    <f:converter id="converterFromEndDate" converterId="timestampShortConverter" /> 
+                                </p:calendar>
+                                <p:calendar id="toEndDate" size="10"  
+                                            mindate="01/01/1900" maxdate="31/12/9999"
+                                            navigator="false"  title="date format dd/mm/yyyy"   
+                                            showOn="false"                                                   
+                                            value="#{mT_ServiceTypeController.toDate_ED}" 
+                                            onchange="PF('filteredTable').filter()"
+                                            pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                            >                                   
+                                    <f:converter id="converterToEndDate" converterId="timestampShortConverter" /> 
+                                </p:calendar>
+                            </f:facet>
+                            <p:calendar id="endDate" disabled="true" size="10"  
+                                        navigator="false"  title="date format dd/mm/yyyy"   
+                                        showOn="false"                                                   
+                                        value="#{data.endDate}" 
+                                        pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                        immediate="true" >
+                                <f:converter id="converterEndDate" converterId="timestampShortConverter" /> 
+                            </p:calendar>                            
+                        </p:column> 
+
+                        <p:column id="statusIdColumn"                                  
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 250px;    
+                                  overflow: hidden"                                  
+                                  headerText="#{tables.MT_SERVICE_TYPE_STATUS_CODE}" 
+                                  rendered="true"
+                                  filterBy="#{data.statusId}"
+                                  filterMatchMode="exact">                             
+                            <f:facet id="filterStatus" name="filter" >  
+                                <p:selectOneMenu id="filterMenuStatus" 
+                                                 onchange="PF('filteredTable').filter()" >
+                                    <f:selectItem id="filterSelectItemStatus" 
+                                                  itemLabel="[ALL ENTITIES]" 
+                                                  itemValue="#{null}" 
+                                                  noSelectionOption="true" />
+                                    <f:selectItems id="filterSelectItemsStatus" 
+                                                   value="#{mT_ServiceTypeController.populateStatusMenuForServiceType()}" />
+                                </p:selectOneMenu>
+                            </f:facet>
+                            <p:selectOneMenu id="statusIdMenu" 
+                                             editable="false" disabled="true"
+                                             immediate="true"
+                                             value="#{data.statusId}"
+                                             >                                         
+                                <f:selectItems id="selectItemsStatusId"
+                                               value="#{mT_ServiceTypeController.populateStatusMenuForServiceType()}"       
+                                               itemDisabled="true"
+                                               var="selectedStatusId"                                                       
+                                               itemValue="#{data.statusId}"
+                                               />    
+                            </p:selectOneMenu>
+                        </p:column>  
+
+                        <p:column id="businessScopeIdColumn"                                  
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"                                  
+                                  headerText="#{tables.MT_SERVICE_TYPE_BUSINESS_SCOPE_CODE}" 
+                                  rendered="true"
+                                  filterBy="#{data.businessScopeId}"
+                                  filterMatchMode="exact">                             
+                            <f:facet id="filterBusinessScope" name="filter" >  
+                                <p:selectOneMenu id="filterMenuBusinessScope" 
+                                                 onchange="PF('filteredTable').filter()" >
+                                    <f:selectItem id="filterSelectItemBusinessScope" 
+                                                  itemLabel="[ALL ENTITIES]" 
+                                                  itemValue="#{null}" 
+                                                  noSelectionOption="true" />
+                                    <f:selectItems id="filterSelectItemsBusinessScope" 
+                                                   value="#{mT_ServiceTypeController.populateBusinessScopeMenu()}" />
+                                </p:selectOneMenu>
+                            </f:facet>
+                            <p:selectOneMenu id="businessScopeIdMenu" 
+                                             editable="false" disabled="true"
+                                             immediate="true"
+                                             value="#{data.businessScopeId}"
+                                             >                                         
+                                <f:selectItems id="selectItemsBusinessScopeId"
+                                               value="#{mT_ServiceTypeController.populateBusinessScopeMenu()}"       
+                                               itemDisabled="true"
+                                               var="selectedBusinessScopeId"                                                       
+                                               itemValue="#{data.businessScopeId}"
+                                               />     
+                            </p:selectOneMenu>
+                        </p:column> 
+
+                        <p:column id="businessTechnologyIdColumn"                                  
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 220px;    
+                                  overflow: hidden"                                  
+                                  headerText="#{tables.MT_SERVICE_TYPE_TECHNOLOGY_SCOPE_CODE}" 
+                                  rendered="true"
+                                  filterBy="#{data.technologyScopeId}"
+                                  filterMatchMode="exact">                             
+                            <f:facet id="filterTechnologyScope" name="filter" >  
+                                <p:selectOneMenu id="filterMenuTechnologyScope" 
+                                                 onchange="PF('filteredTable').filter()" >
+                                    <f:selectItem id="filterSelectItemTechnologyScope" 
+                                                  itemLabel="[ALL ENTITIES]" 
+                                                  itemValue="#{null}" 
+                                                  noSelectionOption="true" />
+                                    <f:selectItems id="filterSelectItemsTechnologyScope" 
+                                                   value="#{mT_ServiceTypeController.populateTechnologyScopeMenu()}" />
+                                </p:selectOneMenu>
+                            </f:facet>
+                            <p:selectOneMenu id="technologyScopeIdMenu" 
+                                             editable="false" disabled="true"
+                                             immediate="true"
+                                             value="#{data.technologyScopeId}"
+                                             >                                         
+                                <f:selectItems id="selectItemsTechnologyScopeId"
+                                               value="#{mT_ServiceTypeController.populateTechnologyScopeMenu()}"       
+                                               itemDisabled="true"
+                                               var="selectedTechnologyScopeId"                                                       
+                                               itemValue="#{data.technologyScopeId}"
+                                               />       
+                            </p:selectOneMenu>
+                        </p:column>
+
+                        <p:column id="inputDateColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_SERVICE_TYPE_INPUT_DATE}" 
+                                  rendered="false" 
+                                  filterBy="#{data.inputDate}"  
+                                  filterFunction="#{mT_ServiceTypeController.filterByInputDateController}"
+                                  >              
+                            <f:facet id="inputDateFilter" name="filter">
+                                <h:inputHidden id="inputDateFilterHidden" />
+                            </f:facet>
+                            <f:facet id="headerFilterInputDate" name="header">   
+                                <h:outputText value="#{tables.MT_SERVICE_TYPE_INPUT_DATE}" />
+                                <br />
+                                <p:calendar id="fromInputDate" size="10"  
+                                            mindate="01/01/1900" maxdate="31/12/9999"
+                                            navigator="false"  title="date format dd/mm/yyyy"   
+                                            showOn="false"           
+                                            value="#{mT_ServiceTypeController.fromDate_ID}"
+                                            onchange="PF('filteredTable').filter()"
+                                            pattern="dd/MM/yyyy HH:mm:ss" mask="true" timeOnly="false"
+                                            >                                                                          
+                                    <f:converter id="converterFromInputDate" converterId="timestampLongConverter" /> 
+                                </p:calendar>
+                                <p:calendar id="toInputDate" size="10"  
+                                            mindate="01/01/1900" maxdate="31/12/9999"
+                                            navigator="false"  title="date format dd/mm/yyyy"   
+                                            showOn="false"                                                   
+                                            value="#{mT_ServiceTypeController.toDate_ID}" 
+                                            onchange="PF('filteredTable').filter()"
+                                            pattern="dd/MM/yyyy HH:mm:ss" mask="true" timeOnly="false"                                                    
+                                            >                                   
+                                    <f:converter id="converterToInputDate" converterId="timestampLongConverter" /> 
+                                </p:calendar>
+                            </f:facet>
+                            <p:calendar id="inputDate" disabled="true" size="10"  
+                                        navigator="false"  title="date format dd/mm/yyyy"   
+                                        showOn="false"                                                   
+                                        value="#{data.startDate}" 
+                                        pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                        immediate="true" >
+                                <f:converter id="converterInputDate" converterId="timestampShortConverter" /> 
+                            </p:calendar>                             
+                        </p:column> 
+
+                        <p:column id="inputUserColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 100px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_SERVICE_TYPE_INPUT_USER}"                                        
+                                  rendered="false"
+                                  filterBy="#{data.inputUser}"  
+                                  filterMatchMode="contains"
+                                  >                
+                            <h:outputText id="inputUser" value="#{data.inputUser}"/>  
+                        </p:column>
+
+                        <p:column id="modifDateColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_SERVICE_TYPE_MODIF_DATE}" 
+                                  rendered="false" 
+                                  filterBy="#{data.modifDate}"  
+                                  filterFunction="#{mT_ServiceTypeController.filterByModifDateController}"
+                                  >              
+                            <f:facet id="modifDateFilter" name="filter">
+                                <h:inputHidden id="modifDateFilterHidden" />
+                            </f:facet>
+                            <f:facet id="headerFilterModifDate" name="header">   
+                                <h:outputText value="#{tables.MT_SERVICE_TYPE_MODIF_DATE}" />
+                                <br />
+                                <p:calendar id="fromModifDate" size="10"  
+                                            mindate="01/01/1900" maxdate="31/12/9999"
+                                            navigator="false"     
+                                            showOn="false"           
+                                            value="#{mT_ServiceTypeController.fromDate_MD}"
+                                            onchange="PF('filteredTable').filter()"
+                                            pattern="dd/MM/yyyy" mask="true" timeOnly="false"
+                                            >                                                                          
+                                    <f:converter id="converterFromModifDate" converterId="timestampShortConverter" /> 
+                                </p:calendar>
+                                <p:calendar id="toModifDate" size="10"  
+                                            mindate="01/01/1900" maxdate="31/12/9999"
+                                            navigator="false" 
+                                            showOn="false"                                                   
+                                            value="#{mT_ServiceTypeController.toDate_MD}" 
+                                            onchange="PF('filteredTable').filter()"
+                                            pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                            >                                   
+                                    <f:converter id="converterToModifDate" converterId="timestampShortConverter" /> 
+                                </p:calendar>
+                            </f:facet>
+                            <p:calendar id="modifDate" disabled="true" size="10"  
+                                        navigator="false"  title="date format dd/mm/yyyy"   
+                                        showOn="false"                                                   
+                                        value="#{data.startDate}" 
+                                        pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                        immediate="true" >
+                                <f:converter id="converterModifDate" converterId="timestampShortConverter" /> 
+                            </p:calendar>                                 
+                        </p:column> 
+
+                        <p:column id="modifUserColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 100px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_SERVICE_TYPE_MODIF_USER}"                                        
+                                  rendered="false"
+                                  filterBy="#{data.modifUser}"  
+                                  filterMatchMode="contains"
+                                  >                
+                            <h:outputText id="modifUser" value="#{data.modifUser}"/>  
+                        </p:column>
+                    </p:dataTable>
+
+
+                    <!-- New data dialog-->	
+                    <p:dialog id="createDialog"     
+                              header="Create new Service Type"                              
+                              widgetVar="createDialog"
+                              maximizable="true">                            
+
+                        <h:panelGrid id="createDialogPanelData" columns="2" cellpadding="5">
+
+                            <p:outputLabel id="newEntityTypeIdLabel" 
+                                           value="Entity Type Code: "
+                                           rendered="false"/>
+                            <p:selectOneMenu id="newEntityType"                                             
+                                             immediate="true"
+                                             editable="false"
+                                             value="#{mT_ServiceTypeController.injectServiceType.entityTypeId}"
+                                             rendered="false">                                         
+                                <f:selectItems value="#{mT_ServiceTypeController.populateEntityTypeMenu()}"       
+                                               id="selectItemsEntityType"
+                                               var="Entity Type Code"   
+                                               itemDisabled="true"
+                                               itemValue="#{mT_ServiceTypeController.injectServiceType.entityTypeId}"
+                                               />                                            
+                            </p:selectOneMenu>   
+
+                            <p:outputLabel id="newServiceTypeCodeLabel" 
+                                           value="Service Type Code: " />
+                            <p:inputText id="newServiceTypeCode" 
+                                         label="Service Type Code" 
+                                         value="#{mT_ServiceTypeController.injectServiceType.serviceTypeCode}">                                 
+                            </p:inputText>
+
+                            <p:outputLabel id="newServiceTypeDescriptionLabel"  value="Description: " />
+                            <p:inputText id="newDescription"
+                                         label="Description" 
+                                         value="#{mT_ServiceTypeController.injectServiceType.description}">                                 
+                            </p:inputText>
+
+
+                            <p:outputLabel id="newServiceTypeStartDateLabel"  
+                                           value="Start Date (dd/mm/yyyy): " />
+                            <p:calendar id="newStartDate" size="19"  
+                                        mindate="01/01/1900" maxdate="31/12/9999"
+                                        navigator="false"  
+                                        title="date format dd/mm/yyyy"   
+                                        showOn="false"                                                   
+                                        value="#{mT_ServiceTypeController.injectServiceType.startDate}" 
+                                        pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                        immediate="true" >
+                                <f:converter id="converterStartDateOutput" converterId="timestampShortConverter" /> 
+                            </p:calendar>   
+
+
+                            <p:outputLabel id="newServiceTypeEndDateLabel"  
+                                           value="End Date (dd/mm/yyyy): " />
+                            <p:calendar id="newEndDate" size="19"  
+                                        mindate="01/01/1900" maxdate="31/12/9999"
+                                        navigator="false"  title="date format dd/mm/yyyy"   
+                                        showOn="false"                                                   
+                                        value="#{mT_ServiceTypeController.injectServiceType.endDate}" 
+                                        pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                        immediate="true" >
+                                <f:converter id="converterEndDateOutput" converterId="timestampShortConverter" /> 
+                            </p:calendar>   
+
+                            <p:outputLabel id="newStatusIdLabel" value="Status Code: " />
+                            <p:selectOneMenu id="newStatus"                                             
+                                             immediate="true"
+                                             value="#{mT_ServiceTypeController.injectServiceType.statusId}">                                         
+                                <f:selectItems value="#{mT_ServiceTypeController.populateStatusMenuForServiceType()}"       
+                                               id="selectItemsStatus"
+                                               var="Status Code"                                                  
+                                               itemValue="#{mT_ServiceTypeController.injectServiceType.statusId}"
+                                               />                                            
+                            </p:selectOneMenu>   
+
+                            <p:outputLabel id="newBusinessScopeIdLabel" value="Business Scope Code: " />
+                            <p:selectOneMenu id="newBusinessScope"                                             
+                                             immediate="true"
+                                             value="#{mT_ServiceTypeController.injectServiceType.businessScopeId}">                                         
+                                <f:selectItems value="#{mT_ServiceTypeController.populateBusinessScopeMenu()}"       
+                                               id="selectItemsBusinessScope"
+                                               var="Business Scope Code"                                                  
+                                               itemValue="#{mT_ServiceTypeController.injectServiceType.businessScopeId}"
+                                               />                                            
+                            </p:selectOneMenu>   
+
+                            <p:outputLabel id="newTecnhologySopeIdLabel" value="Technology Scope Code: " />
+                            <p:selectOneMenu id="newTechnologyScope"                                             
+                                             immediate="true"
+                                             value="#{mT_ServiceTypeController.injectServiceType.technologyScopeId}">                                         
+                                <f:selectItems value="#{mT_ServiceTypeController.populateTechnologyScopeMenu()}"       
+                                               id="selectItemsTechnologyScope"
+                                               var="Technology Scope Code"                                                  
+                                               itemValue="#{mT_ServiceTypeController.injectServiceType.technologyScopeId}"
+                                               />                                            
+                            </p:selectOneMenu>   
+
+                            <p:outputLabel id="newServiceTypeInputDateLabel"  
+                                           value="Input Date: " 
+                                           rendered="false"/>
+                            <p:calendar id="newInputDate" size="19"  
+                                        mindate="01/01/1900" maxdate="31/12/9999"
+                                        navigator="false"  title="date format dd/mm/yyyy"   
+                                        showOn="false"                                                   
+                                        value="#{mT_ServiceTypeController.injectServiceType.inputDate}" 
+                                        pattern="dd/MM/yyyy" mask="true" timeOnly="false"     
+                                        disabled="true"
+                                        immediate="true" 
+                                        rendered="false">
+                                <f:converter id="converterInputDateOutput" converterId="timestampShortConverter" /> 
+                            </p:calendar>   
+
+                            <p:outputLabel id="newServiceTypeInputUserLabel" 
+                                           value="Input User: "
+                                           rendered="false"/>
+                            <p:inputText id="newUserInput" label="Input User" 
+                                         disabled="true"
+                                         value="#{mT_ServiceTypeController.injectServiceType.inputUser}"
+                                         rendered="false">
+                            </p:inputText>
+
+                            <p:outputLabel id="newServiceTypeModifDateLabel"  
+                                           value="Modif. Date (dd/mm/yyyy): " 
+                                           rendered="false"/>
+                            <p:calendar id="newModifDate" size="19"  
+                                        mindate="01/01/1900" maxdate="31/12/9999"
+                                        navigator="false"  title="date format dd/mm/yyyy"   
+                                        showOn="false"                                                   
+                                        value="#{mT_ServiceTypeController.injectServiceType.modifDate}" 
+                                        pattern="dd/MM/yyyy" mask="true" timeOnly="false"     
+                                        disabled="true"
+                                        immediate="true" 
+                                        rendered="false">
+                                <f:converter id="converterModifDateOutput" converterId="timestampShortConverter" /> 
+                            </p:calendar> 
+
+                            <p:outputLabel id="newServiceTypeModifUserLabel" 
+                                           value="Modif. User: " 
+                                           rendered="false"/>
+                            <p:inputText id="newModifUser" label="Modif. User" 
+                                         disabled="true"
+                                         value="#{mT_ServiceTypeController.injectServiceType.modifUser}"
+                                         rendered="false">                                 
+                            </p:inputText>
+
+
+                        </h:panelGrid>
+                        <h:panelGrid id="createDialogPanelButtons" columns="3" cellspacing="50" cellpadding="5">
+                            <p:commandButton value="#{properties.L_OK}" 
+                                             actionListener="#{mT_ServiceTypeController.createNew()}"                                                   
+                                             styleClass="ui-confirmdialog-yes" 
+                                             update="form:table"
+                                             icon="#{properties.I_OK}">
+                            </p:commandButton>
+                            <p:commandButton value="#{properties.L_CANCEL}"                                                  
+                                             styleClass="ui-confirmdialog-no" 
+                                             oncomplete="PF('createDialog').hide()" 
+                                             icon="#{properties.I_CANCEL}"
+                                             actionListener="#{mT_ServiceTypeController.pushResetButton}">
+                            </p:commandButton>
+                            <p:commandButton id="createDialogClear" 
+                                             value="Clear" 
+                                             icon="#{properties.F_I_CLEAR}" 
+                                             update="createDialogPanelData"
+                                             process="@this"                                             
+                                             actionListener="#{mT_ServiceTypeController.pushResetButton}" >
+                            </p:commandButton>
+                        </h:panelGrid>
+
+                    </p:dialog> 
+                </h:form>
+            </ui:define>
+        </ui:composition>
+    </h:body>
+</html>

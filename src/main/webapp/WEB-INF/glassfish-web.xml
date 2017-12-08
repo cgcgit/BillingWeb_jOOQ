@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE glassfish-web-app PUBLIC "-//GlassFish.org//DTD GlassFish Application Server 3.1 Servlet 3.0//EN" "http://glassfish.org/dtds/glassfish-web-app_3_0-1.dtd">
+<glassfish-web-app error-url="">
+    <resources>
+        <resource-ref>
+            <res-ref-name>jdbc/db_billing</res-ref-name>
+            <jndi-name>jdbc/db_billing</jndi-name>
+            <default-resource-principal>
+                <name>billing_admin</name>
+                <password>billing_admin</password>
+            </default-resource-principal>
+        </resource-ref>
+        <jdbc-connection-pool allow-non-component-callers="false" associate-with-thread="false" connection-creation-retry-attempts="0" connection-creation-retry-interval-in-seconds="10" connection-leak-reclaim="false" connection-leak-timeout-in-seconds="0" connection-validation-method="auto-commit" datasource-classname="org.postgresql.ds.PGConnectionPoolDataSource" fail-all-connections="false" idle-timeout-in-seconds="300" is-connection-validation-required="false" is-isolation-level-guaranteed="true" lazy-connection-association="false" lazy-connection-enlistment="false" match-connections="false" max-connection-usage-count="0" max-pool-size="32" max-wait-time-in-millis="60000" name="BillingWeb" non-transactional-connections="false" pool-resize-quantity="2" res-type="javax.sql.ConnectionPoolDataSource" statement-timeout-in-seconds="-1" steady-pool-size="8" validate-atmost-once-period-in-seconds="0" wrap-jdbc-objects="false">
+            <description>Database connection for BillingWeb</description>
+            <property name="URL" value="jdbc:postgresql://localhost:5432/_db_billing_pool"/>
+            <property name="User" value="billing_admin"/>
+            <property name="Password" value="billing_admin"/>
+        </jdbc-connection-pool>
+    </resources>
+    <class-loader delegate="true"/>
+    <jsp-config>
+        <property name="keepgenerated" value="true">
+            <description>Keep a copy of the generated servlet class' java code.</description>
+        </property>
+    </jsp-config>
+</glassfish-web-app>

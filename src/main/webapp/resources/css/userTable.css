@@ -1,0 +1,21 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 06-dic-2016, 14:02:54
+    Author     : catuxa
+    Source     : http://stackoverflow.com/questions/16559157/primefaces-datatable-header-alignment
+*/
+
+
+.stringColumn{
+    font-family:Arial Black !important;
+    text-align:  left !important;
+    font-size: 32px !important;
+    
+    min-width: 5% !important;
+    max-width: 15% !important;
+    overflow: hidden !important;
+}

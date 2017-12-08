@@ -1,0 +1,241 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    <f:metadata>  
+        <f:viewAction id="loadData" action="#{mT_ConsumptionTypeController.loadDataList()}" phase="INVOKE_APPLICATION" >
+        </f:viewAction> 
+        <f:viewAction id="defaultControlVariables" action="#{mT_ConsumptionTypeController.defaultValueControlVariablesIni()}" phase="INVOKE_APPLICATION" >
+        </f:viewAction>   
+    </f:metadata>
+
+    <h:body>        
+
+        <ui:composition id="mainTemplate" template="./../resources/templates/mainTemplate.xhtml">
+            <ui:define id="title" name="title">#{pages.T_PARAMETRICS_CONSUMPTION_TYPE} </ui:define>
+            <ui:define id="content" name="content">   
+                <h:form id="form"  >  
+                    <p:growl id="messageGrowl"  showDetail="true" autoUpdate="true"  /> 
+
+                    <p:remoteCommand id="remoteCommandUpdateTable" name="updateTable"  process="@this" update="form:table" />
+
+                    <p:dataTable id="table" var="data" 
+                                 value="#{mT_ConsumptionTypeController.dataList}"                                     
+                                 emptyMessage="Any consumption type for this criteria"
+                                 resizableColumns="true" 
+                                 scrollable="true"  scrollWidth="100%" 
+                                 paginator="true"                                      
+                                 tableStyle="table-layout:fixed;width:100%;"
+                                 rows="10"     
+                                 editable="true"  
+                                 rowIndexVar="rowIndex"                                    
+                                 selection="#{mT_ConsumptionTypeController.selectedData}">                            
+
+                        <f:facet id="facetHeader" name="header">  
+                            Consumption Type
+                            <p>
+                                <p:commandButton id="createButton" 
+                                                 value="New consumption type"
+                                                 title="Create a new consumption type for the promotions" 
+                                                 action="#{mT_ConsumptionTypeController.pushNewButton()}" 
+                                                 update=":form:createDialogPanelData"
+                                                 rendered="#{mT_ConsumptionTypeController.canUserEditModify()}"
+                                                 process="@this"> 
+                                </p:commandButton>
+                            </p>
+                        </f:facet>  
+                        <f:facet id="facetFooter" name="footer">                                 
+                        </f:facet> 
+
+
+                        <p:ajax id="ajaxRowEditInit" event="rowEditInit"  listener="#{mT_ConsumptionTypeController.onRowInit}"  />
+                        <p:ajax id="ajaxRowEdit" event="rowEdit" listener="#{mT_ConsumptionTypeController.onRowEdit}"  update="form:messageGrowl"                                                                                               
+                                oncomplete="if (!args.validationFailed) {updateTable();}">                            
+                        </p:ajax>
+                        <p:ajax id="ajaxRowEditCancel" event="rowEditCancel" listener="#{mT_ConsumptionTypeController.onRowCancel}" update="form:messageGrowl" 
+                                oncomplete="if (!args.validationFailed) {updateTable();}"/>
+
+
+                        <!-- EDIT COLUMS -->   
+                        <p:column  id="deleteRow"
+                                   style="font-family:Arial Black;
+                                   text-align: center;
+                                   font-size: 12px;
+                                   width: 20px;    
+                                   overflow: hidden"
+                                   headerText="DEL ROW" 
+                                   rendered="#{mT_ConsumptionTypeController.canUserEditModify()}"
+                                   >
+                            <p:commandButton  id="deleteButton" icon="fa fa-trash" 
+                                              actionListener="#{mT_ConsumptionTypeController.pushDeleteButton}"
+                                              immediate="true" 
+                                              onclick="PF('deleteConfirmDialog').show()"
+                                              disabled="#{mT_ConsumptionTypeController.editingMode}"
+                                              oncomplete="if(!args.validationFailed) {updateTable();}"
+                                              rendered="#{mT_ConsumptionTypeController.canUserEditModify()}"                                
+                                              >     
+                                 <f:param id="currentRow" name="currentRow" value="#{rowIndex}" />
+                            </p:commandButton>
+
+                        </p:column>
+
+                        <p:column id="editRow" 
+                                  style="font-family:Arial Black;
+                                  text-align: center;
+                                  font-size: 12px;
+                                  width: 20px;    
+                                  overflow: hidden"
+                                  headerText="EDIT ROW" 
+                                  rendered="#{mT_ConsumptionTypeController.canUserEditModify()}"
+                                  >
+                            <p:rowEditor id="editButton" rendered="#{mT_ConsumptionTypeController.canUserEditModify()}" >                               
+                            </p:rowEditor>                 
+                        </p:column>
+
+                        <!-- DATA TABLE -->
+                        <p:column id="consumptionTypeId" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 70px;    
+                                  overflow: hidden;
+                                  visibility: hidden"
+                                  headerText="#{tables.MT_CONSUMPTION_TYPE_CONSUMPTION_TYPE_ID}"                                       
+                                  rendered="false" >
+                            <h:outputText value="#{data.consumptionTypeId}" />
+                        </p:column>    
+                        
+                        <p:column id="consumptionTypeCode" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 100px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_CONSUMPTION_TYPE_CONSUMPTION_TYPE_CODE}"                                        
+                                  rendered="true" 
+                                  filterBy="#{data.consumptionTypeCode}"  
+                                  filterMatchMode="contains">
+                            <h:outputText id="filterConsumptionTypeCode" value="" />
+                                  
+                            <p:cellEditor id="cellEditorConsumptionTypeCode">
+                                <f:facet id="facetConsumptionTypeCodeOutput" name="output">  
+                                    <h:outputText id="consumptionTypeCodeOutput" value="#{data.consumptionTypeCode}"/>  
+                                </f:facet>  
+                                <f:facet id="facetConsumptionTypeCodeInput" name="input">  
+                                    <p:inputText id="consumptionTypeCodeInput" 
+                                                 label="Consumption Type Code"
+                                                 value="#{data.consumptionTypeCode}" 
+                                                 style="width:96%"
+                                                 required="true" 
+                                                 requiredMessage="Consumption Type Code can't be null">  
+                                        <f:validateLength  minimum="1" maximum="10"/>
+                                        <p:ajax event="change" update="consumptionTypeCodeOutput" />
+                                    </p:inputText>
+                                </f:facet>  
+                            </p:cellEditor>
+                        </p:column>
+                        
+                        <p:column id="consumptionTypeDescription" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_CONSUMPTION_TYPE_DESCRIPTION}" 
+                                  rendered="true"
+                                  filterBy="#{data.description}"  
+                                  filterMatchMode="contains">        
+                            
+                            <h:outputText id="filterDescription" value="" />
+                                  
+                            <p:cellEditor id="cellEditorConsumptionTypeDescription">
+                                <f:facet id="facetConsumptionTypeDescriptionOutput" name="output">  
+                                    <h:outputText id="consumptionTypeDescriptionOutput" value="#{data.description}"/>  
+                                </f:facet>  
+                                <f:facet id="facetConsumptionTypeDescription" name="input">  
+                                    <p:inputText id="consumptionTypeDescriptionInput" 
+                                                 label="Consumption Description"
+                                                 value="#{data.description}" style="width:96%"
+                                                 required="true" requiredMessage="Consumption Type Description can't be null"> 
+                                         <f:validateLength  minimum="1" maximum="100"/>
+                                        <p:ajax event="change" update="consumptionTypeDescriptionOutput" />
+                                    </p:inputText>
+                                </f:facet>  
+                            </p:cellEditor>
+                        </p:column>
+
+
+                    </p:dataTable>
+                    <!-- New data dialog-->	
+                    <p:dialog id="createDialog"     
+                              header="Create new Consumption Type"                              
+                              widgetVar="createDialog">                            
+
+                        <h:panelGrid id="createDialogPanelData" columns="2" cellpadding="5">
+                            <p:outputLabel id="newConsumptionTypeLabel" value="Consumption Type: " />
+                            <p:inputText id="newConsumptionTypeInput" label="Consumption Type" 
+                                         value="#{mT_ConsumptionTypeController.injectConsumptionType.consumptionTypeCode}">                                 
+                            </p:inputText>
+
+                            <p:outputLabel id="newConsumptionTypeDescriptionLabel"  value="Description: " />
+                            <p:inputText id="newConsumptionTypeDescriptionInput" 
+                                         label="Consumption Description" 
+                                         value="#{mT_ConsumptionTypeController.injectConsumptionType.description}">                                 
+                            </p:inputText>
+                        </h:panelGrid>
+                        <h:panelGrid id="createDialogPanelButtons" columns="3" cellpadding="5">
+                            <p:commandButton value="#{properties.L_OK}" 
+                                             actionListener="#{mT_ConsumptionTypeController.createNew()}"                                                   
+                                             styleClass="ui-confirmdialog-yes" 
+                                             update="form:table"
+                                             icon="#{properties.I_OK}">
+                            </p:commandButton>
+                            <p:commandButton value="#{properties.L_CANCEL}"                                                  
+                                             styleClass="ui-confirmdialog-no" 
+                                             oncomplete="PF('createDialog').hide()" 
+                                             icon="#{properties.I_CANCEL}"
+                                             actionListener="#{mT_ConsumptionTypeController.pushResetButton}">
+                            </p:commandButton>
+                            <p:commandButton id="createDialogClear" 
+                                             value="Clear" 
+                                             icon="#{properties.F_I_CLEAR}" 
+                                             update="createDialogPanelData"
+                                             process="@this"
+                                             actionListener="#{mT_ConsumptionTypeController.pushResetButton}" >
+                            </p:commandButton>
+                        </h:panelGrid>
+
+                    </p:dialog> 
+
+                    <!-- Delete confirm dialog -->	
+                    <p:confirmDialog global="true" 
+                                     styleClass="change-position" 
+                                     widgetVar="deleteConfirmDialog"
+                                     header="DELETE ROW"
+                                     message="Do you really want to delete this row?
+                                     (The row was inmediately delete on the system)"
+                                     >
+                        <p:commandButton id="okDeleteConfirmDialog" value="#{properties.L_OK}"                                           
+                                         styleClass="ui-confirmdialog-yes" 
+                                         actionListener="#{mT_ConsumptionTypeController.deleteRow}"
+                                         oncomplete="PF('deleteConfirmDialog').hide()" 
+                                         process="@this"  
+                                         update="form:table"
+                                         icon="#{properties.I_OK}"/>
+                        <p:commandButton id="cancelDeleteConfirmDialog"
+                                         value="#{properties.L_CANCEL}"                                         
+                                         styleClass="ui-confirmdialog-no"    
+                                         oncomplete="PF('deleteConfirmDialog').hide()"     
+                                         type="button"
+                                         process="@this"  
+                                         icon="#{properties.I_CANCEL}"/>
+                    </p:confirmDialog> 
+                </h:form>
+            </ui:define>
+        </ui:composition>
+    </h:body>
+</html>

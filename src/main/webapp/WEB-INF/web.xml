@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.1" 
+         xmlns="http://xmlns.jcp.org/xml/ns/javaee" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee 
+                             http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+    
+    <!-- to debug errors: value Development -->
+    <context-param>
+        <param-name>javax.faces.PROJECT_STAGE</param-name>
+        <param-value>Development</param-value>
+       <!-- <param-value>Production</param-value> -->
+    </context-param>
+    <context-param>
+        <param-name>javax.faces.DEFAULT_SUFFIX</param-name>
+        <param-value>.xhtml</param-value>
+    </context-param>
+    <context-param>
+        <param-name>com.sun.faces.enableViewStateIdRendering</param-name>
+        <!-- Prevent duplicate javax.faces.ViewState element IDs. -->
+        <param-value>false</param-value> 
+    </context-param>
+    <context-param>
+        <param-name>javax.faces.PARTIAL_STATE_SAVING</param-name>
+        <param-value>true</param-value>
+    </context-param>
+    <context-param>
+        <description>State saving method: 'client' or 'server' (=default). See JSF Specification 2.5.2</description>
+        <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
+        <param-value>server</param-value>
+    </context-param>
+    <!-- Flash scope filter -->
+    
+    <!--
+   <filter>
+        <filter-name>ResponseBufferSizeFilter</filter-name>
+        <filter-class>es.billingweb.filter.ResponseBufferSizeFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>ResponseBufferSizeFilter</filter-name>
+        <url-pattern>*.xhtml</url-pattern>
+    </filter-mapping>
+-->
+    <!-- Login Filter -->
+    <filter>
+        <filter-name>login</filter-name>
+        <filter-class>es.billingweb.filter.LoginFilter</filter-class>
+    </filter>
+    <!-- Set the login filter to secure all the pages in the /protected/* path of the application  -->
+    <filter-mapping>
+        <filter-name>login</filter-name>
+        <url-pattern>/protected/*</url-pattern>
+    </filter-mapping>
+    <!-- By default go to secured welcome page -->
+    <welcome-file-list>
+        <welcome-file>faces/public/login.xhtml</welcome-file>
+    </welcome-file-list>
+    <error-page>
+        <error-code>403</error-code>
+        <location>/faces/public/voidCredentials.xhtml</location>
+    </error-page>
+    <!-- Login access via FORM -->
+    <login-config>
+        <auth-method>FORM</auth-method>
+        <realm-name>billing_config</realm-name>
+        <form-login-config>
+            <form-login-page>/faces/public/login.xhtml</form-login-page>
+            <form-error-page>/faces/public/voidCredentials.xhtml</form-error-page>
+        </form-login-config>
+    </login-config>
+    
+    <!-- Staring JSF -->
+    <servlet>
+        <servlet-name>Faces Servlet</servlet-name>
+        <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
+    </servlet>
+    <!-- JSF URL mapping -->
+    <servlet-mapping>
+        <servlet-name>Faces Servlet</servlet-name>
+        <url-pattern>/faces/*</url-pattern>
+    </servlet-mapping>
+    <session-config>
+        <session-timeout>
+            30
+        </session-timeout>
+    </session-config>        
+    <resource-ref>
+        <description>Database connection for BillingWeb</description>
+        <res-ref-name>jdbc/db_billing</res-ref-name>
+        <res-type>javax.sql.ConnectionPoolDataSource</res-type>
+        <res-auth>Container</res-auth>
+        <res-sharing-scope>Shareable</res-sharing-scope>
+    </resource-ref>
+    <context-param>
+        <param-name>primefaces.THEME</param-name>
+        <param-value>afternoon</param-value>
+    </context-param>
+    <context-param>
+        <param-name>primefaces.FONT_AWESOME</param-name>
+        <param-value>true</param-value>
+    </context-param>
+    <!-- MIME FOR THE FONT_AWESOME -->
+    <mime-mapping>
+        <extension>ttf</extension>
+        <mime-type>application/x-font-ttf</mime-type>
+    </mime-mapping>
+    <mime-mapping>
+        <extension>woff</extension>
+        <mime-type>application/x-font-woff</mime-type>
+    </mime-mapping>
+    <mime-mapping>
+        <extension>woff2</extension>
+        <mime-type>application/x-font-woff2</mime-type>
+    </mime-mapping>
+    <mime-mapping>
+        <extension>eot</extension>
+        <mime-type>application/x-font-eot</mime-type>
+    </mime-mapping>
+                                          
+        
+</web-app>

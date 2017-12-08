@@ -1,0 +1,72 @@
+<?xml version='1.0' encoding='UTF-8' ?> 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">       
+
+
+    <!-- method executed before the page shows -->
+    <f:event id="mainEventValidateTemplate" type="preRenderView" listener ="#{mainTemplateController.sessionValidate()}"/>
+
+    <f:loadBundle id="uiComponentBundleTemplate" var="properties" basename="properties.ui_component"></f:loadBundle>
+    <f:loadBundle id="pagesBundleTemplate" var="pages" basename="properties.pages"></f:loadBundle>
+    <f:loadBundle id="tablesBundleTemplate" var="tables" basename="properties.tables"></f:loadBundle>
+
+    <h:head id="mainHeadTemplate">
+        <title id="titleHeadTemplate">
+            <ui:insert id="headTemplate" name="title">Plantilla</ui:insert>
+        </title>
+    </h:head>
+
+    <h:body id="mainBodyTemplate">        
+        <p:growl id="globalMessage" for="globalMessage" globalOnly="true"  />
+        <!-- <ui:include src="/resources/components/sessionExpired.xhtml"></ui:include>
+        -->
+
+        <p:layout id="mainLayout" fullPage="true">
+            <p:layoutUnit id="layoutUnitTop" position="north" resizable="true" >
+                <!-- problem with visualization under the panel: https://forum.primefaces.org/viewtopic.php?f=3&t=17428#p57887 -->
+                <style type="text/css">
+                    .ui-layout-north {
+                        z-index:20 !important;
+                        overflow:visible !important;;
+                    }
+
+                    .ui-layout-north .ui-layout-unit-content {
+                        overflow:visible !important;
+                    }
+                </style>
+                <h:form id ="mainFormTop">
+                    <div id="left">
+                        <ui:insert id="topPanel" name="top">
+                            <ui:insert id="topTemplate" name="top">                                
+                                <ui:include id="includeTopTemplate" src="/resources/components/topMenu.xhtml">                                         
+                                </ui:include>                                    
+                            </ui:insert>
+                        </ui:insert>
+                    </div>
+                </h:form>
+            </p:layoutUnit>
+
+            <p:layoutUnit id="layoutUnitCenter" position="center">
+                <div id="content" >
+                    <ui:insert id="contentTemplate" name="content">
+                        <!--   Aquí va el contenido. Si no hay contenido, se mostrará este texto por defecto -->
+                    </ui:insert>
+                </div>       
+            </p:layoutUnit>
+
+            <p:layoutUnit id="layoutUnitBottom" position="south" >      
+                <div id="bottom">
+                    <ui:insert id="bottonTemplate" name="bottom">
+                        <!--    Pie de pagina -->
+                    </ui:insert>
+                </div>
+            </p:layoutUnit>
+        </p:layout>
+
+    </h:body>
+
+</html>

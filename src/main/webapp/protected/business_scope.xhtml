@@ -1,0 +1,240 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    <f:metadata>  
+        <f:viewAction id="loadData" action="#{mT_BusinessScopeController.loadDataList()}" phase="INVOKE_APPLICATION" >
+        </f:viewAction> 
+        <f:viewAction id="defaultControlVariables" action="#{mT_BusinessScopeController.defaultValueControlVariablesIni()}" phase="INVOKE_APPLICATION" >
+        </f:viewAction>   
+    </f:metadata>
+
+    <h:body>        
+
+        <ui:composition id="mainTemplate" template="./../resources/templates/mainTemplate.xhtml">
+            <ui:define id="title" name="title">#{pages.T_PARAMETRICS_BUSINESS_SCOPE} </ui:define>
+            <ui:define id="content" name="content">   
+                <h:form id="form"  >  
+                    <p:growl id="messageGrowl"  showDetail="true" autoUpdate="true"  /> 
+
+                    <p:remoteCommand id="remoteCommandUpdateTable" name="updateTable"  process="@this" update="form:table" />
+
+                    <p:dataTable id="table" var="data" 
+                                 value="#{mT_BusinessScopeController.dataList}"                                     
+                                 emptyMessage="Any business scope for this criteria"
+                                 resizableColumns="true" 
+                                 scrollable="true"  scrollWidth="100%" 
+                                 paginator="true"                                      
+                                 tableStyle="table-layout:fixed;width:100%;"
+                                 rows="10"     
+                                 editable="true"  
+                                 rowIndexVar="rowIndex"                                    
+                                 selection="#{mT_BusinessScopeController.selectedData}">                            
+
+                        <f:facet id="facetHeader" name="header">  
+                            Business Scope
+                            <p>
+                                <p:commandButton id="createButton" 
+                                                 value="New business scope"
+                                                 title="Create a new business scope for the promotions" 
+                                                 action="#{mT_BusinessScopeController.pushNewButton()}" 
+                                                 update=":form:createDialogPanelData"
+                                                 rendered="#{mT_BusinessScopeController.canUserEditModify()}"
+                                                 process="@this"> 
+                                </p:commandButton>
+                            </p>
+                        </f:facet>  
+                        <f:facet id="facetFooter" name="footer">                                 
+                        </f:facet> 
+
+
+                        <p:ajax id="ajaxRowEditInit" event="rowEditInit"  listener="#{mT_BusinessScopeController.onRowInit}"  />
+                        <p:ajax id="ajaxRowEdit" event="rowEdit" listener="#{mT_BusinessScopeController.onRowEdit}"  update="form:messageGrowl"                                                                                               
+                                oncomplete="if (!args.validationFailed) {updateTable();}">                            
+                        </p:ajax>
+                        <p:ajax id="ajaxRowEditCancel" event="rowEditCancel" listener="#{mT_BusinessScopeController.onRowCancel}" update="form:messageGrowl" 
+                                oncomplete="if (!args.validationFailed) {updateTable();}"/>
+
+
+                        <!-- EDIT COLUMS -->   
+                        <p:column  id="deleteRow"
+                                   style="font-family:Arial Black;
+                                   text-align: center;
+                                   font-size: 12px;
+                                   width: 20px;    
+                                   overflow: hidden"
+                                   headerText="DEL ROW" 
+                                   rendered="#{mT_BusinessScopeController.canUserEditModify()}"
+                                   >
+                            <p:commandButton  id="deleteButton" icon="fa fa-trash" 
+                                              actionListener="#{mT_BusinessScopeController.pushDeleteButton}"
+                                              immediate="true" 
+                                              onclick="PF('deleteConfirmDialog').show()"
+                                              disabled="#{mT_BusinessScopeController.editingMode}"
+                                              oncomplete="if(!args.validationFailed) {updateTable();}"
+                                              rendered="#{mT_BusinessScopeController.canUserEditModify()}"                                
+                                              >     
+                                 <f:param id="currentRow" name="currentRow" value="#{rowIndex}" />
+                            </p:commandButton>
+
+                        </p:column>
+
+                        <p:column id="editRow" 
+                                  style="font-family:Arial Black;
+                                  text-align: center;
+                                  font-size: 12px;
+                                  width: 20px;    
+                                  overflow: hidden"
+                                  headerText="EDIT ROW" 
+                                  rendered="#{mT_BusinessScopeController.canUserEditModify()}"
+                                  >
+                            <p:rowEditor id="editButton" rendered="#{mT_BusinessScopeController.canUserEditModify()}" >                               
+                            </p:rowEditor>                 
+                        </p:column>
+
+                        <!-- DATA TABLE -->
+                        <p:column id="discountScopeId" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 70px;    
+                                  overflow: hidden;
+                                  visibility: hidden"
+                                  headerText="#{tables.MT_BUSINESS_SCOPE_BUSINESS_SCOPE_ID}"                                       
+                                  rendered="false" >
+                            <h:outputText value="#{data.businessScopeId}" />
+                        </p:column>    
+                        
+                        <p:column id="discountScopeCode" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 100px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_BUSINESS_SCOPE_BUSINESS_SCOPE_CODE}"                                        
+                                  rendered="true" 
+                                  filterBy="#{data.businessScopeCode}"  
+                                  filterMatchMode="contains">
+                            <h:outputText id="filterBusinessScopeCode" value="" />
+                                  
+                            <p:cellEditor id="cellEditorBusinessScopeCode">
+                                <f:facet id="facetBusinessScopeCodeOutput" name="output">  
+                                    <h:outputText id="discountScopeCodeOutput" 
+                                                  value="#{data.businessScopeCode}"/>  
+                                </f:facet>  
+                                <f:facet id="facetBusinessScopeCodeInput" name="input">  
+                                    <p:inputText id="discountScopeCodeInput" 
+                                                 label="Business Scope Code"
+                                                 value="#{data.businessScopeCode}" style="width:96%"
+                                                 required="true" requiredMessage="Business Scope Code can't be null">  
+                                        <f:validateLength  minimum="1" maximum="10"/>
+                                        <p:ajax event="change" update="discountScopeCodeOutput" />
+                                    </p:inputText>
+                                </f:facet>  
+                            </p:cellEditor>
+                        </p:column>
+                        
+                        <p:column id="discountScopeDescription" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_BUSINESS_SCOPE_DESCRIPTION}" 
+                                  rendered="true"
+                                  filterBy="#{data.description}"  
+                                  filterMatchMode="contains">        
+                            
+                            <h:outputText id="filterDescription" value="" />                            
+                            
+                            <p:cellEditor id="cellEditorBusinessScopeDescription">
+                                <f:facet id="facetBusinessScopeDescriptionOutput" name="output">  
+                                    <h:outputText id="discountScopeDescriptionOutput" value="#{data.description}"/>  
+                                </f:facet>  
+                                <f:facet id="facetBusinessScopeDescription" name="input">  
+                                    <p:inputText id="discountScopeDescriptionInput" 
+                                                 label="Discount Description"
+                                                 value="#{data.description}" style="width:96%"
+                                                 required="true" requiredMessage="Business Scope Description can't be null"> 
+                                         <f:validateLength  minimum="1" maximum="100"/>
+                                        <p:ajax event="change" update="discountScopeDescriptionOutput" />
+                                    </p:inputText>
+                                </f:facet>  
+                            </p:cellEditor>
+                        </p:column>
+
+
+                    </p:dataTable>
+                    <!-- New data dialog-->	
+                    <p:dialog id="createDialog"     
+                              header="Create new Business Scope"                              
+                              widgetVar="createDialog">                            
+
+                        <h:panelGrid id="createDialogPanelData" columns="2" cellpadding="5">
+                            <p:outputLabel id="newBusinessScopeCodeLabel" value="Business Scope Code: " />
+                            <p:inputText id="newBusinessScopeCodeInput" label="Business Scope Code" 
+                                         value="#{mT_BusinessScopeController.injectBusinessScope.businessScopeCode}">                                 
+                            </p:inputText>
+
+                            <p:outputLabel id="newBusinessScopeDescriptionLabel"  value="Description: " />
+                            <p:inputText id="newBusinessScopeDescriptionInput" 
+                                         label="Discount Description" 
+                                         value="#{mT_BusinessScopeController.injectBusinessScope.description}">                                 
+                            </p:inputText>
+                        </h:panelGrid>
+                        <h:panelGrid id="createDialogPanelButtons" columns="3" cellpadding="5">
+                            <p:commandButton value="#{properties.L_OK}" 
+                                             actionListener="#{mT_BusinessScopeController.createNew()}"                                                   
+                                             styleClass="ui-confirmdialog-yes" 
+                                             update="form:table"
+                                             icon="#{properties.I_OK}">
+                            </p:commandButton>
+                            <p:commandButton value="#{properties.L_CANCEL}"                                                  
+                                             styleClass="ui-confirmdialog-no" 
+                                             oncomplete="PF('createDialog').hide()" 
+                                             icon="#{properties.I_CANCEL}"
+                                             actionListener="#{mT_BusinessScopeController.pushResetButton}">
+                            </p:commandButton>
+                            <p:commandButton id="createDialogClear" 
+                                             value="Clear" 
+                                             icon="#{properties.F_I_CLEAR}" 
+                                             update="createDialogPanelData"
+                                             process="@this"
+                                             actionListener="#{mT_BusinessScopeController.pushResetButton}" >
+                            </p:commandButton>
+                        </h:panelGrid>
+
+                    </p:dialog> 
+
+                    <!-- Delete confirm dialog -->	
+                    <p:confirmDialog global="true" 
+                                     styleClass="change-position" 
+                                     widgetVar="deleteConfirmDialog"
+                                     header="DELETE ROW"
+                                     message="Do you really want to delete this row?
+                                     (The row was inmediately delete on the system)"
+                                     >
+                        <p:commandButton id="okDeleteConfirmDialog" value="#{properties.L_OK}"                                           
+                                         styleClass="ui-confirmdialog-yes" 
+                                         actionListener="#{mT_BusinessScopeController.deleteRow}"
+                                         oncomplete="PF('deleteConfirmDialog').hide()" 
+                                         process="@this"  
+                                         update="form:table"
+                                         icon="#{properties.I_OK}"/>
+                        <p:commandButton id="cancelDeleteConfirmDialog"
+                                         value="#{properties.L_CANCEL}"                                         
+                                         styleClass="ui-confirmdialog-no"    
+                                         oncomplete="PF('deleteConfirmDialog').hide()"     
+                                         type="button"
+                                         process="@this"  
+                                         icon="#{properties.I_CANCEL}"/>
+                    </p:confirmDialog> 
+                </h:form>
+            </ui:define>
+        </ui:composition>
+    </h:body>
+</html>

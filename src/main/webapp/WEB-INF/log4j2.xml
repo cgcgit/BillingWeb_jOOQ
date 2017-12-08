@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright 2016 catuxa.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<Configuration status="ERROR" name="log-config">
+    <Properties>
+        <!-- properties to use in the config file -->
+        <Property name="LOG_DIR">/home/catuxa/NetBeansProjects/logs</Property>
+        <Property name="ARCHIVE">${LOG_DIR}/archive</Property>
+        <Property name="PATTERN">[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c:%M(%L): %m%n</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="console-log" target="SYSTEM_OUT">
+            <PatternLayout pattern="${PATTERN}"/>
+        </Console>
+        <RollingFile name="trace-log" fileName="${LOG_DIR}/billingWeb-trace.log"
+                     filePattern="${ARCHIVE}/billingWeb-trace_%d{yyyyMMdd}.log.gz">
+            <PatternLayout pattern="${PATTERN}" />
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="24" modulate="true"/>
+            </Policies>
+             <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+
+        <RollingFile name="error-log" fileName="${LOG_DIR}/billingWeb-error.log"
+                     filePattern="${ARCHIVE}/billingWeb-error_%d{yyyyMMdd}.log.gz">
+            <PatternLayout pattern="${PATTERN}" />
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="24" modulate="true"/>
+            </Policies>
+             <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="es.billingweb" level="debug" additivity="false">
+            <appender-ref ref="trace-log" level="info"/>
+            <appender-ref ref="error-log" level="error"/>    
+            <appender-ref ref="console-log" level="debug" additivity="false"/>        
+        </Logger>
+
+        <Root level="info" additivity="false">
+            <AppenderRef ref="console-log"/>
+        </Root>
+    </Loggers>
+
+</Configuration>

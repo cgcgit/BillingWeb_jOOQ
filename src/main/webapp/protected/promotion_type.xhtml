@@ -1,0 +1,944 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    <f:metadata>          
+        <f:viewAction id="defaultControlVariables" action="#{mT_PromotionTypeController.defaultValueControlVariablesIni()}" phase="INVOKE_APPLICATION" >
+        </f:viewAction>   
+        <f:viewAction id="loadData" action="#{mT_PromotionTypeController.loadDataList()}" phase="INVOKE_APPLICATION" >
+        </f:viewAction> 
+    </f:metadata>
+
+    <h:body>        
+
+        <ui:composition id="mainTemplate" template="./../resources/templates/mainTemplate.xhtml">
+            <ui:define id="title" name="title">#{pages.T_CATALOG_PROMOTION_TYPE} </ui:define>
+            <ui:define id="content" name="content">   
+                <h:form id="form"  >  
+
+                    <h:panelGrid id="searchDatePanel" columns="3" cellpadding="5">
+                        <h:outputText id="searchDateText" value="Search date:" />
+                        <p:calendar id="searchDate" size="10"                                              
+                                    navigator="false"  title="date format dd/mm/yyyy"   
+                                    showOn="false"           
+                                    value="#{mT_PromotionTypeController.searchDate}"                                            
+                                    pattern="dd/MM/yyyy" mask="true" timeOnly="false"
+                                    >                                                                          
+                            <f:converter id="converterSearchDate" converterId="timestampShortConverter" /> 
+                        </p:calendar>
+                        <p:commandButton id="seachButton" 
+                                         icon="#{properties.I_SEARCH}" 
+                                         actionListener="#{mT_PromotionTypeController.loadDataList()}"
+                                         update=":form:table"                                                 
+                                         > 
+                            <f:param id="currentRow" name="currentRow" value="#{rowIndex}" />
+                        </p:commandButton>
+
+                    </h:panelGrid>
+
+
+                    <p:growl id="messageGrowl"  showDetail="true" autoUpdate="true"  />                     
+                    <p:dataTable id="table" var="data" 
+                                 value="#{mT_PromotionTypeController.dataList}"                                     
+                                 emptyMessage="Any promotion type for this criteria"
+                                 resizableColumns="true" 
+                                 scrollable="true"  scrollWidth="100%" 
+                                 paginator="true"                                      
+                                 tableStyle="table-layout:fixed;width:100%;"
+                                 rows="10"     
+                                 editable="true"  
+                                 rowIndexVar="rowIndex"  
+                                 widgetVar="filteredTable"
+                                 filteredValue="#{mT_PromotionTypeController.filteredDataList}"
+                                 selection="#{mT_PromotionTypeController.selectedData}">                            
+
+                        <f:facet id="facetHeader" name="header">  
+                            Promotion Types
+                            <p>
+                                <p:commandButton id="createButton" 
+                                                 value="New Promotion Type"
+                                                 title="Create a new promotion type" 
+                                                 action="#{mT_PromotionTypeController.pushNewButton()}" 
+                                                 update=":form:createDialogPanelData"
+                                                 rendered="#{mT_PromotionTypeController.canUserEditModify()}"
+                                                 process="@this"> 
+                                </p:commandButton>
+                            </p>                            
+
+                        </f:facet>  
+                        <f:facet id="facetFooter" name="footer">                                 
+                        </f:facet> 
+
+                        <!-- OPTIONS -->
+                        <p:column id="detailColumn"
+                                  headerText="DETAIL" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 50px;    
+                                  overflow: hidden"    >                            
+                            <br/>
+                            <p:button id="detailButton"
+                                      icon="#{properties.I_SEARCH}" 
+                                      title="Detail" 
+                                      outcome="#{pages.PROMOTION_TYPE_DETAIL_PAGE}"> 
+                                <f:param id="promotionTypeIdSearch" 
+                                         name="promotionTypeId" 
+                                         value=" #{data.promotionTypeId}">
+                                </f:param>         
+                            </p:button>                             
+
+                        </p:column>	  
+
+
+                        <!-- DATA TABLE -->
+                        <p:column id="promotionTypeIdColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 70px;    
+                                  overflow: hidden;
+                                  visibility: hidden"
+                                  headerText="#{tables.MT_PROMOTION_TYPE_PROMOTION_TYPE_ID}"                                       
+                                  rendered="false" >
+                            <h:outputText id="promotionTypeId" value="#{data.promotionTypeId}" />
+                        </p:column>    
+
+
+                        <p:column id="entityTypeIdColumn"                                  
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"                                  
+                                  headerText="#{tables.MT_PROMOTION_TYPE_ENTITY_TYPE_CODE}" 
+                                  rendered="false"
+                                  filterBy="#{data.entityTypeId}"
+                                  filterMatchMode="exact"
+                                  >                             
+                            <f:facet id="filterEntityType" name="filter" >  
+                                <p:selectOneMenu id="filterMenuEntityType" 
+                                                 onchange="PF('filteredTable').filter()" >
+                                    <f:selectItem id="filterSelectItemEntityType" 
+                                                  itemLabel="[ALL ENTITIES]" itemValue="#{null}"
+                                                  noSelectionOption="true" />
+                                    <f:selectItems id="filterSelectItemsEntityType" 
+                                                   value="#{mT_PromotionTypeController.populateEntityTypeMenu()}" />
+                                </p:selectOneMenu>
+                            </f:facet>
+                            <p:selectOneMenu id="entityTypeMenu" 
+                                             disabled="true"
+                                             immediate="true"
+                                             value="#{data.entityTypeId}"
+                                             >                                         
+                                <f:selectItems  id="selectItemsEntityTypeId"
+                                                value="#{mT_PromotionTypeController.populateEntityTypeMenu()}"       
+                                                itemDisabled="true"
+                                                var="selectedEntityTypeOutput"                                                       
+                                                itemValue="#{data.entityTypeId}"
+                                                />     
+                            </p:selectOneMenu>
+                        </p:column>  
+
+                        <p:column id="promotionTypeCodeColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_PROMOTION_TYPE_PROMOTION_TYPE_CODE}"                                        
+                                  rendered="true"
+                                  filterBy="#{data.promotionTypeCode}"  
+                                  filterMatchMode="contains"
+                                  >                
+                            <h:outputText id="promotionTypeCode" value="#{data.promotionTypeCode}"/>  
+                        </p:column>
+
+                        <p:column id="voucherColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 150px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_PROMOTION_TYPE_VOUCHER}"                                        
+                                  rendered="true"
+                                  filterBy="#{data.voucher}"  
+                                  filterMatchMode="equals">                
+                            <f:facet id="filterVoucher" name="filter" >  
+                                <p:selectOneMenu id="filterMenuVoucher" 
+                                                 onchange="PF('filteredTable').filter()" >
+                                    <f:selectItem id="filterSelectItemVoucher" 
+                                                  itemLabel="[ALL ENTITIES]" 
+                                                  itemValue="#{null}" 
+                                                  noSelectionOption="true" />
+                                    <f:selectItems id="filterSelectItemsVoucher" 
+                                                   value="#{mT_PromotionTypeController.populateBooleanYesNoMenu()}" />
+                                </p:selectOneMenu>
+                            </f:facet>
+                            <p:selectOneMenu id="voucherMenu" 
+                                             editable="false" disabled="true"
+                                             immediate="true"
+                                             value="#{data.voucher}"
+                                             >                                         
+                                <f:selectItems id="selectItemsVoucher"
+                                               value="#{mT_PromotionTypeController.populateBooleanYesNoMenu()}"       
+                                               itemDisabled="true"
+                                               var="selectedVoucher"                                                       
+                                               itemValue="#{data.voucher}"
+                                               />    
+                            </p:selectOneMenu>
+                        </p:column>  
+
+
+                        <p:column id="descriptionColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_PROMOTION_TYPE_DESCRIPTION}" 
+                                  rendered="true" 
+                                  filterBy="#{data.description}"  
+                                  filterMatchMode="contains"
+                                  >                          
+                            <h:outputText id="description" value="#{data.description}"/>  
+                        </p:column>
+
+                        <p:column id="startDateColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_PROMOTION_TYPE_START_DATE}" 
+                                  rendered="true" 
+                                  filterBy="#{data.startDate}"  
+                                  filterFunction="#{mT_PromotionTypeController.filterByStartDateController}"
+                                  >              
+                            <f:facet id="startDateFilter" name="filter">
+                                <h:inputHidden id="startDateFilterHidden" />
+                            </f:facet>
+                            <f:facet id="headerFilterStartDate" name="header">   
+                                <h:outputText value="#{tables.MT_PROMOTION_TYPE_START_DATE}" />
+                                <br />
+                                <p:calendar id="fromStartDate" size="10" 
+                                            navigator="false"  title="date format dd/mm/yyyy"   
+                                            showOn="false"           
+                                            value="#{mT_PromotionTypeController.fromDate_SD}"
+                                            onchange="PF('filteredTable').filter()"
+                                            pattern="dd/MM/yyyy" mask="true" timeOnly="false"
+                                            >                                                                          
+                                    <f:converter id="converterFromStartDate" converterId="timestampShortConverter" /> 
+                                </p:calendar>
+                                <p:calendar id="toStartDate" size="10"                                              
+                                            navigator="false"  title="date format dd/mm/yyyy"   
+                                            showOn="false"                                                   
+                                            value="#{mT_PromotionTypeController.toDate_SD}" 
+                                            onchange="PF('filteredTable').filter()"
+                                            pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                            >                                   
+                                    <f:converter id="converterToStartDate" converterId="timestampShortConverter" /> 
+                                </p:calendar>
+                            </f:facet>
+                            <p:calendar id="startDate" disabled="true" size="10"  
+                                        navigator="false"  title="date format dd/mm/yyyy"   
+                                        showOn="false"                                                   
+                                        value="#{data.startDate}" 
+                                        pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                        immediate="true" >
+                                <f:converter id="converterStartDate" converterId="timestampShortConverter" /> 
+                            </p:calendar>                             
+                        </p:column> 
+
+
+                        <p:column id="endDateColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_PROMOTION_TYPE_END_DATE}" 
+                                  rendered="true" 
+                                  filterBy="#{data.endDate}"  
+                                  filterFunction="#{mT_PromotionTypeController.filterByEndDateController}"
+                                  >              
+                            <f:facet id="endDateFilter" name="filter">
+                                <h:inputHidden id="endDateFilterHidden" />
+                            </f:facet>
+                            <f:facet id="headerFilterEndDate" name="header">   
+                                <h:outputText value="#{tables.MT_PROMOTION_TYPE_END_DATE}" />
+                                <br />
+                                <p:calendar id="fromEndDate" size="10"                                              
+                                            navigator="false"  title="date format dd/mm/yyyy"   
+                                            showOn="false"           
+                                            value="#{mT_PromotionTypeController.fromDate_ED}"
+                                            onchange="PF('filteredTable').filter()"
+                                            pattern="dd/MM/yyyy" mask="true" timeOnly="false"
+                                            >                                                                          
+                                    <f:converter id="converterFromEndDate" converterId="timestampShortConverter" /> 
+                                </p:calendar>
+                                <p:calendar id="toEndDate" size="10"                                             
+                                            navigator="false"  title="date format dd/mm/yyyy"   
+                                            showOn="false"                                                   
+                                            value="#{mT_PromotionTypeController.toDate_ED}" 
+                                            onchange="PF('filteredTable').filter()"
+                                            pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                            >                                   
+                                    <f:converter id="converterToEndDate" converterId="timestampShortConverter" /> 
+                                </p:calendar>
+                            </f:facet>
+                            <p:calendar id="endDate" disabled="true" size="10"  
+                                        navigator="false"  title="date format dd/mm/yyyy"   
+                                        showOn="false"                                                   
+                                        value="#{data.endDate}" 
+                                        pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                        immediate="true" >
+                                <f:converter id="converterEndDate" converterId="timestampShortConverter" /> 
+                            </p:calendar>                           
+                        </p:column> 
+
+                        <p:column id="statusIdColumn"                                  
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 250px;    
+                                  overflow: hidden"                                  
+                                  headerText="#{tables.MT_PROMOTION_TYPE_STATUS_CODE}" 
+                                  rendered="true"
+                                  filterBy="#{data.statusId}"
+                                  filterMatchMode="exact">                             
+                            <f:facet id="filterStatus" name="filter" >  
+                                <p:selectOneMenu id="filterMenuStatus" 
+                                                 onchange="PF('filteredTable').filter()" >
+                                    <f:selectItem id="filterSelectItemStatus" 
+                                                  itemLabel="[ALL ENTITIES]" 
+                                                  itemValue="#{null}" 
+                                                  noSelectionOption="true" />
+                                    <f:selectItems id="filterSelectItemsStatus" 
+                                                   value="#{mT_PromotionTypeController.populateStatusMenuForPromotionType()}" />
+                                </p:selectOneMenu>
+                            </f:facet>
+                            <p:selectOneMenu id="statusIdMenu" 
+                                             editable="false" disabled="true"
+                                             immediate="true"
+                                             value="#{data.statusId}"
+                                             >                                         
+                                <f:selectItems id="selectItemsStatusId"
+                                               value="#{mT_PromotionTypeController.populateStatusMenuForPromotionType()}"       
+                                               itemDisabled="true"
+                                               var="selectedStatusId"                                                       
+                                               itemValue="#{data.statusId}"
+                                               />    
+                            </p:selectOneMenu>
+                        </p:column>  
+
+                        <p:column id="applicationLevelIdColumn"                                  
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"                                  
+                                  headerText="#{tables.MT_PROMOTION_TYPE_APPLICATION_LEVEL_CODE}" 
+                                  rendered="true"
+                                  filterBy="#{data.applicationLevelId}"
+                                  filterMatchMode="exact">                             
+                            <f:facet id="filterApplicationLevel" name="filter" >  
+                                <p:selectOneMenu id="filterMenuApplicationLevel" 
+                                                 onchange="PF('filteredTable').filter()" >
+                                    <f:selectItem id="filterSelectItemApplicationLevel" 
+                                                  itemLabel="[ALL ENTITIES]" 
+                                                  itemValue="#{null}" 
+                                                  noSelectionOption="true" />
+                                    <f:selectItems id="filterSelectItemsApplicationLevel" 
+                                                   value="#{mT_PromotionTypeController.populateApplicationLevelMenu()}" />
+                                </p:selectOneMenu>
+                            </f:facet>
+                            <p:selectOneMenu id="applicationLevelIdMenu" 
+                                             editable="false" disabled="true"
+                                             immediate="true"
+                                             value="#{data.applicationLevelId}"
+                                             >                                         
+                                <f:selectItems id="selectItemsApplicationLevelId"
+                                               value="#{mT_PromotionTypeController.populateApplicationLevelMenu()}"       
+                                               itemDisabled="true"
+                                               var="selectedApplicationLevelId"                                                       
+                                               itemValue="#{data.applicationLevelId}"
+                                               />     
+                            </p:selectOneMenu>
+                        </p:column> 
+
+                        <p:column id="businessScopeIdColumn"                                  
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"                                  
+                                  headerText="#{tables.MT_PROMOTION_TYPE_BUSINESS_SCOPE_CODE}" 
+                                  rendered="true"
+                                  filterBy="#{data.businessScopeId}"
+                                  filterMatchMode="exact">                             
+                            <f:facet id="filterBusinessScope" name="filter" >  
+                                <p:selectOneMenu id="filterMenuBusinessScope" 
+                                                 onchange="PF('filteredTable').filter()" >
+                                    <f:selectItem id="filterSelectItemBusinessScope" 
+                                                  itemLabel="[ALL ENTITIES]" 
+                                                  itemValue="#{null}" 
+                                                  noSelectionOption="true" />
+                                    <f:selectItems id="filterSelectItemsBusinessScope" 
+                                                   value="#{mT_PromotionTypeController.populateBusinessScopeMenu()}" />
+                                </p:selectOneMenu>
+                            </f:facet>
+                            <p:selectOneMenu id="businessScopeIdMenu" 
+                                             editable="false" disabled="true"
+                                             immediate="true"
+                                             value="#{data.businessScopeId}"
+                                             >                                         
+                                <f:selectItems id="selectItemsBusinessScopeId"
+                                               value="#{mT_PromotionTypeController.populateBusinessScopeMenu()}"       
+                                               itemDisabled="true"
+                                               var="selectedBusinessScopeId"                                                       
+                                               itemValue="#{data.businessScopeId}"
+                                               />     
+                            </p:selectOneMenu>
+                        </p:column> 
+
+                        <p:column id="TechnologyScopeIdColumn"                                  
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 220px;    
+                                  overflow: hidden"                                  
+                                  headerText="#{tables.MT_PROMOTION_TYPE_TECHNOLOGY_SCOPE_CODE}" 
+                                  rendered="true"
+                                  filterBy="#{data.technologyScopeId}"
+                                  filterMatchMode="exact">                             
+                            <f:facet id="filterTechnologyScope" name="filter" >  
+                                <p:selectOneMenu id="filterMenuTechnologyScope" 
+                                                 onchange="PF('filteredTable').filter()" >
+                                    <f:selectItem id="filterSelectItemTechnologyScope" 
+                                                  itemLabel="[ALL ENTITIES]" 
+                                                  itemValue="#{null}" 
+                                                  noSelectionOption="true" />
+                                    <f:selectItems id="filterSelectItemsTechnologyScope" 
+                                                   value="#{mT_PromotionTypeController.populateTechnologyScopeMenu()}" />
+                                </p:selectOneMenu>
+                            </f:facet>
+                            <p:selectOneMenu id="technologyScopeIdMenu" 
+                                             editable="false" disabled="true"
+                                             immediate="true"
+                                             value="#{data.technologyScopeId}"
+                                             >                                         
+                                <f:selectItems id="selectItemsTechnologyScopeId"
+                                               value="#{mT_PromotionTypeController.populateTechnologyScopeMenu()}"       
+                                               itemDisabled="true"
+                                               var="selectedTechnologyScopeId"                                                       
+                                               itemValue="#{data.technologyScopeId}"
+                                               />       
+                            </p:selectOneMenu>
+                        </p:column>
+
+                        <p:column id="discountTypeIdColumn"                                  
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"                                  
+                                  headerText="#{tables.MT_PROMOTION_TYPE_DISCOUNT_TYPE_CODE}" 
+                                  rendered="true"
+                                  filterBy="#{data.discountTypeId}"
+                                  filterMatchMode="exact">                             
+                            <f:facet id="filterDiscountType" name="filter" >  
+                                <p:selectOneMenu id="filterMenuDiscountType" 
+                                                 onchange="PF('filteredTable').filter()" >
+                                    <f:selectItem id="filterSelectItemDiscountType" 
+                                                  itemLabel="[ALL ENTITIES]" 
+                                                  itemValue="#{null}" 
+                                                  noSelectionOption="true" />
+                                    <f:selectItems id="filterSelectItemsDiscountType" 
+                                                   value="#{mT_PromotionTypeController.populateDiscountTypeMenu()}" />
+                                </p:selectOneMenu>
+                            </f:facet>
+                            <p:selectOneMenu id="discountTypeIdMenu" 
+                                             editable="false" disabled="true"
+                                             immediate="true"
+                                             value="#{data.discountTypeId}"
+                                             >                                         
+                                <f:selectItems id="selectItemsDiscountTypeId"
+                                               value="#{mT_PromotionTypeController.populateDiscountTypeMenu()}"       
+                                               itemDisabled="true"
+                                               var="selectedDiscountTypeId"                                                       
+                                               itemValue="#{data.discountTypeId}"
+                                               />     
+                            </p:selectOneMenu>
+                        </p:column> 
+
+                        <p:column id="variable" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 150px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_PROMOTION_TYPE_VARIABLE}"                                        
+                                  rendered="true"
+                                  filterBy="#{data.variable}"  
+                                  filterMatchMode="equals"
+                                  >                
+                            <f:facet id="filterVariable" name="filter" >  
+                                <p:selectOneMenu id="filterMenuVariable" 
+                                                 onchange="PF('filteredTable').filter()" >
+                                    <f:selectItem id="filterSelectItemVariable" 
+                                                  itemLabel="[ALL ENTITIES]" 
+                                                  itemValue="#{null}" 
+                                                  noSelectionOption="true" />
+                                    <f:selectItems id="filterSelectItemsVariable" 
+                                                   value="#{mT_PromotionTypeController.populateBooleanYesNoMenu()}" />
+                                </p:selectOneMenu>
+                            </f:facet>
+                            <p:selectOneMenu id="variableMenu" 
+                                             editable="false" disabled="true"
+                                             immediate="true"
+                                             value="#{data.variable}"
+                                             >                                         
+                                <f:selectItems id="selectItemsVariable"
+                                               value="#{mT_PromotionTypeController.populateBooleanYesNoMenu()}"       
+                                               itemDisabled="true"
+                                               var="selectedVariable"                                                       
+                                               itemValue="#{data.variable}"
+                                               />    
+                            </p:selectOneMenu>
+                        </p:column>  
+
+
+                        <p:column id="minDiscountColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 150px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_PROMOTION_TYPE_MIN_DISCOUNT_VALUE}"                                        
+                                  rendered="true"
+                                  filterBy="#{data.minDiscountValue}"  
+                                  filterFunction="#{mT_PromotionTypeController.filterByMinValue}"
+                                  >   
+                            <f:facet id="minDiscountFilter" name="filter">
+                                <h:inputHidden id="minDiscountFilterHidden" />
+                            </f:facet>
+                            <f:facet id="headerFilterMinDiscount" name="header">   
+                                <h:outputText value="#{tables.MT_PROMOTION_TYPE_MIN_DISCOUNT_VALUE}" />
+                                <br />                                
+                                <h:inputText id="minFromValue" maxlength="6" style="width: 60px"
+                                             value="#{mT_PromotionTypeController.valueMinFrom}" >
+                                    <f:converter converterId="javax.faces.Integer" />
+                                </h:inputText>
+                                <p:spacer width="5" />
+                                <h:inputText id="minToValue" maxlength="6"  style="width: 60px"    
+                                             value="#{mT_PromotionTypeController.valueMinTo}" >
+                                    <f:converter converterId="javax.faces.Integer" />
+                                </h:inputText>                                
+                            </f:facet>                            
+
+                            <h:outputText id="minValue" value="#{data.minDiscountValue}">  
+                                <f:converter converterId="javax.faces.Integer" />
+                            </h:outputText>
+                        </p:column>
+
+                        <p:column id="maxDiscountColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 150px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_PROMOTION_TYPE_MAX_DISCOUNT_VALUE}"                                        
+                                  rendered="true"
+                                  filterBy="#{data.maxDiscountValue}"  
+                                  filterFunction="#{mT_PromotionTypeController.filterByMaxValue}"
+                                  >   
+                            <f:facet id="maxDiscountFilter" name="filter">
+                                <h:inputHidden id="maxDiscountFilterHidden" />
+                            </f:facet>
+                            <f:facet id="headerFilterMaxDiscount" name="header">   
+                                <h:outputText value="#{tables.MT_PROMOTION_TYPE_MAX_DISCOUNT_VALUE}" />
+                                <br />                                
+                                <h:inputText id="maxFromValue" maxlength="6" style="width: 60px"
+                                             value="#{mT_PromotionTypeController.valueMaxFrom}" >
+                                    <f:converter converterId="javax.faces.Integer" />
+                                </h:inputText>
+                                <p:spacer width="5" />
+                                <h:inputText id="maxToValue" maxlength="6"  style="width: 60px"    
+                                             value="#{mT_PromotionTypeController.valueMaxTo}" >
+                                    <f:converter converterId="javax.faces.Integer" />
+                                </h:inputText>                                
+                            </f:facet>                            
+
+                            <h:outputText id="maxValue" value="#{data.maxDiscountValue}">  
+                                <f:converter converterId="javax.faces.Integer" />
+                            </h:outputText>
+                        </p:column>
+
+
+                        <p:column id="inputDateColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_PROMOTION_TYPE_INPUT_DATE}" 
+                                  rendered="false" 
+                                  filterBy="#{data.inputDate}"  
+                                  filterFunction="#{mT_PromotionTypeController.filterByInputDateController}"
+                                  >              
+                            <f:facet id="inputDateFilter" name="filter">
+                                <h:inputHidden id="inputDateFilterHidden" />
+                            </f:facet>
+                            <f:facet id="headerFilterInputDate" name="header">   
+                                <h:outputText value="#{tables.MT_PROMOTION_TYPE_INPUT_DATE}" />
+                                <br />
+                                <p:calendar id="fromInputDate" size="10"                                              
+                                            navigator="false"  title="date format dd/mm/yyyy"   
+                                            showOn="false"           
+                                            value="#{mT_PromotionTypeController.fromDate_ID}"
+                                            onchange="PF('filteredTable').filter()"
+                                            pattern="dd/MM/yyyy" mask="true" timeOnly="false"
+                                            >                                                                          
+                                    <f:converter id="converterFromInputDate" converterId="timestampShortConverter" /> 
+                                </p:calendar>
+                                <p:calendar id="toInputDate" size="10"  
+                                            navigator="false"  title="date format dd/mm/yyyy"   
+                                            showOn="false"                                                   
+                                            value="#{mT_PromotionTypeController.toDate_ID}" 
+                                            onchange="PF('filteredTable').filter()"
+                                            pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                            >                                   
+                                    <f:converter id="converterToInputDate" converterId="timestampShortConverter" /> 
+                                </p:calendar>
+                            </f:facet>
+                            <p:calendar id="inputDate" disabled="true" size="10"  
+                                        navigator="false"  title="date format dd/mm/yyyy"   
+                                        showOn="false"                                                   
+                                        value="#{data.startDate}" 
+                                        pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                        immediate="true" >
+                                <f:converter id="converterInputDate" converterId="timestampShortConverter" /> 
+                            </p:calendar>                          
+                        </p:column> 
+
+                        <p:column id="inputUserColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 100px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_PROMOTION_TYPE_INPUT_USER}"                                        
+                                  rendered="false"
+                                  filterBy="#{data.inputUser}"  
+                                  filterMatchMode="contains"
+                                  >                
+                            <h:outputText id="inputUser" value="#{data.inputUser}"/>  
+                        </p:column>
+
+                        <p:column id="modifDateColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_PROMOTION_TYPE_MODIF_DATE}" 
+                                  rendered="false" 
+                                  filterBy="#{data.modifDate}"  
+                                  filterFunction="#{mT_PromotionTypeController.filterByModifDateController}"
+                                  >              
+                            <f:facet id="modifDateFilter" name="filter">
+                                <h:inputHidden id="modifDateFilterHidden" />
+                            </f:facet>
+                            <f:facet id="headerFilterModifDate" name="header">   
+                                <h:outputText value="#{tables.MT_PROMOTION_TYPE_MODIF_DATE}" />
+                                <br />
+                                <p:calendar id="fromModifDate" size="10"  
+                                            navigator="false"     
+                                            showOn="false"           
+                                            value="#{mT_PromotionTypeController.fromDate_MD}"
+                                            onchange="PF('filteredTable').filter()"
+                                            pattern="dd/MM/yyyy" mask="true" timeOnly="false"
+                                            >                                                                          
+                                    <f:converter id="converterFromModifDate" converterId="timestampShortConverter" /> 
+                                </p:calendar>
+                                <p:calendar id="toModifDate" size="10"  
+                                            navigator="false" 
+                                            showOn="false"                                                   
+                                            value="#{mT_PromotionTypeController.toDate_MD}" 
+                                            onchange="PF('filteredTable').filter()"
+                                            pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                            >                                   
+                                    <f:converter id="converterToModifDate" converterId="timestampShortConverter" /> 
+                                </p:calendar>
+                            </f:facet>
+                            <p:calendar id="modifDate" disabled="true" size="10"  
+                                        navigator="false"  title="date format dd/mm/yyyy"   
+                                        showOn="false"                                                   
+                                        value="#{data.startDate}" 
+                                        pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                        immediate="true" >
+                                <f:converter id="converterModifDate" converterId="timestampShortConverter" /> 
+                            </p:calendar>                           
+                        </p:column> 
+
+                        <p:column id="modifUserColumn" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 100px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_PROMOTION_TYPE_MODIF_USER}"                                        
+                                  rendered="false"
+                                  filterBy="#{data.modifUser}"  
+                                  filterMatchMode="contains"
+                                  >                
+                            <h:outputText id="modifUser" value="#{data.modifUser}"/>  
+                        </p:column>
+                    </p:dataTable>
+
+
+                    <!-- New data dialog-->	
+                    <p:dialog id="createDialog"     
+                              header="Create new Promotion Type"                              
+                              widgetVar="createDialog"                              
+                              closeOnEscape="true"
+                              >                            
+
+                        <h:panelGrid id="createDialogPanelData" columns="2" cellpadding="5">
+
+                            <p:outputLabel id="newEntityTypeIdLabel" 
+                                           value="Entity Type Code: " 
+                                           rendered="false"/>
+                            <p:selectOneMenu id="newEntityType"                                             
+                                             immediate="true"
+                                             editable="false"
+                                             value="#{mT_PromotionTypeController.injectPromotionType.entityTypeId}"
+                                             rendered="false">
+                                <f:selectItems value="#{mT_PromotionTypeController.populateEntityTypeMenu()}"       
+                                               id="selectItemsEntityType"
+                                               var="Entity Type Code"   
+                                               itemDisabled="true"
+                                               itemValue="#{mT_PromotionTypeController.injectPromotionType.entityTypeId}"
+                                               rendered="false"
+                                               />                                            
+                            </p:selectOneMenu>   
+
+                            <p:outputLabel id="newPromotionTypeCodeLabel" 
+                                           value="Promotion Type Code: " />
+                            <p:inputText id="newPromotionTypeCode" 
+                                         label="Promotion Type Code" 
+                                         maxlength="10"
+                                         value="#{mT_PromotionTypeController.injectPromotionType.promotionTypeCode}">                                 
+                            </p:inputText>
+
+                            <p:outputLabel id="newPromotionTypeDescriptionLabel" 
+                                           value="Description: " />
+                            <p:inputText id="newDescription"
+                                         label="Description" 
+                                         maxlength="100"
+                                         value="#{mT_PromotionTypeController.injectPromotionType.description}">                                 
+                            </p:inputText>
+
+
+                            <p:outputLabel id="newVoucherLabel" value="Voucher?: " />
+                            <p:selectOneMenu id="newVoucher"                                             
+                                             immediate="true"
+                                             value="#{mT_PromotionTypeController.injectPromotionType.voucher}">                                         
+                                <f:selectItems value="#{mT_PromotionTypeController.populateBooleanYesNoMenu()}"       
+                                               id="selectItemsNewVoucher"
+                                               var="Voucher"                                                  
+                                               itemValue="#{mT_PromotionTypeController.injectPromotionType.voucher}"
+                                               />                                            
+                            </p:selectOneMenu>   
+
+                            <p:outputLabel id="newPromotionTypeStartDateLabel"  
+                                           value="Start Date (dd/mm/yyyy): " />
+                            <p:calendar id="newStartDate" size="10"  
+                                        navigator="false"  
+                                        title="date format dd/mm/yyyy"   
+                                        showOn="false"                                                   
+                                        value="#{mT_PromotionTypeController.injectPromotionType.startDate}" 
+                                        pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                        immediate="true" >
+                                <f:converter id="converterStartDateOutput" converterId="timestampShortConverter" /> 
+                            </p:calendar>   
+
+
+                            <p:outputLabel id="newPromotionTypeEndDateLabel"  
+                                           value="End Date (dd/mm/yyyy): " />
+                            <p:calendar id="newEndDate" size="10"  
+                                        navigator="false"  title="date format dd/mm/yyyy"   
+                                        showOn="false"                                                   
+                                        value="#{mT_PromotionTypeController.injectPromotionType.endDate}" 
+                                        pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                        immediate="true" >
+                                <f:converter id="converterEndDateOutput" converterId="timestampShortConverter" /> 
+                            </p:calendar>   
+
+                            <p:outputLabel id="newStatusIdLabel" value="Status Code: " />
+                            <p:selectOneMenu id="newStatus"                                             
+                                             immediate="true"
+                                             value="#{mT_PromotionTypeController.injectPromotionType.statusId}">                                         
+                                <f:selectItems value="#{mT_PromotionTypeController.populateStatusMenuForPromotionType()}"       
+                                               id="selectItemsStatus"
+                                               var="Status Code"                                                  
+                                               itemValue="#{mT_PromotionTypeController.injectPromotionType.statusId}"
+                                               />                                            
+                            </p:selectOneMenu>   
+                            
+                            <p:outputLabel id="newApplicationLevelIdLabel" value="Application Level: " />
+                            <p:selectOneMenu id="newApplicationLevel"                                             
+                                             immediate="true"
+                                             value="#{mT_PromotionTypeController.injectPromotionType.applicationLevelId}">                                         
+                                <f:selectItems value="#{mT_PromotionTypeController.populateApplicationLevelMenu()}"       
+                                               id="selectApplicationLevel"
+                                               var="Application Level"                                                  
+                                               itemValue="#{mT_PromotionTypeController.injectPromotionType.applicationLevelId}"
+                                               />                                            
+                            </p:selectOneMenu>   
+
+                            <p:outputLabel id="newBusinessScopeIdLabel" value="Business Scope Code: " />
+                            <p:selectOneMenu id="newBusinessScope"                                             
+                                             immediate="true"
+                                             value="#{mT_PromotionTypeController.injectPromotionType.businessScopeId}">                                         
+                                <f:selectItems value="#{mT_PromotionTypeController.populateBusinessScopeMenu()}"       
+                                               id="selectItemsBusinessScope"
+                                               var="Business Scope Code"                                                  
+                                               itemValue="#{mT_PromotionTypeController.injectPromotionType.businessScopeId}"
+                                               />                                            
+                            </p:selectOneMenu>   
+
+                            <p:outputLabel id="newTecnhologySopeIdLabel" value="Technology Scope Code: " />
+                            <p:selectOneMenu id="newTechnologyScope"                                             
+                                             immediate="true"
+                                             value="#{mT_PromotionTypeController.injectPromotionType.technologyScopeId}">                                         
+                                <f:selectItems value="#{mT_PromotionTypeController.populateTechnologyScopeMenu()}"       
+                                               id="selectItemsTechnologyScope"
+                                               var="Technology Scope Code"                                                  
+                                               itemValue="#{mT_PromotionTypeController.injectPromotionType.technologyScopeId}"
+                                               />                                            
+                            </p:selectOneMenu>   
+
+                            <p:outputLabel id="newDiscountTypeLabel" value="Discount Type: " />
+                            <p:selectOneMenu id="newDiscountType"                                             
+                                             immediate="true"
+                                             value="#{mT_PromotionTypeController.injectPromotionType.discountTypeId}">                                         
+                                <f:selectItems value="#{mT_PromotionTypeController.populateDiscountTypeMenu()}"       
+                                               id="selectItemsNewDiscountType"
+                                               var="Discount Type"                                                  
+                                               itemValue="#{mT_PromotionTypeController.injectPromotionType.discountTypeId}"
+                                               />                                            
+                            </p:selectOneMenu>
+
+
+                            <p:outputLabel id="newVariableLabel" value="Variable?: " />
+                            <p:selectOneMenu id="newVariable"                                             
+                                             immediate="true"
+                                             value="#{mT_PromotionTypeController.injectPromotionType.variable}">                                         
+                                <f:selectItems value="#{mT_PromotionTypeController.populateBooleanYesNoMenu()}"       
+                                               id="selectItemsNewVariable"
+                                               var="Variable"                                                  
+                                               itemValue="#{mT_PromotionTypeController.injectPromotionType.variable}"
+                                               />                                            
+                            </p:selectOneMenu>
+
+                            <p:outputLabel id="newPromotionTypeInputDateLabel"  
+                                           value="Input Date: " 
+                                           rendered="false"/>
+                            <p:calendar id="newInputDate" size="10"  
+                                        navigator="false"  title="date format dd/mm/yyyy"   
+                                        showOn="false"                                                   
+                                        value="#{mT_PromotionTypeController.injectPromotionType.inputDate}" 
+                                        pattern="dd/MM/yyyy" mask="true" timeOnly="false"     
+                                        disabled="true"
+                                        immediate="true" 
+                                        rendered="false">
+                                <f:converter id="converterInputDateOutput" converterId="timestampShortConverter" /> 
+                            </p:calendar>   
+
+                            <p:outputLabel id="newPromotionTypeMinValueLabel" 
+                                           value="Min discount value: " 
+                                           />
+                            <p:inputText id="newMinValue" label="Min Discount Value" 
+                                         value="#{mT_PromotionTypeController.injectPromotionType.minDiscountValue}"
+                                         maxlength="9"> 
+                                <f:converter converterId="javax.faces.Integer" />                                
+                            </p:inputText>
+
+                            <p:outputLabel id="newPromotionTypeMaxValueLabel" 
+                                           value="Max discount value: " 
+                                           />
+                            <p:inputText id="newMaxValue" label="Max Discount Value" 
+                                         value="#{mT_PromotionTypeController.injectPromotionType.maxDiscountValue}"
+                                         maxlength="9"> 
+                                <f:converter converterId="javax.faces.Integer" />                                
+                            </p:inputText>
+                            
+
+                            <p:outputLabel id="newPromotionTypeInputUserLabel" 
+                                           value="Input User: " 
+                                           rendered="false"/>
+                            <p:inputText id="newUserInput" label="Input User" 
+                                         disabled="true"
+                                         value="#{mT_PromotionTypeController.injectPromotionType.inputUser}"
+                                         rendered="false">                                 
+                            </p:inputText>
+
+                            <p:outputLabel id="newPromotionTypeModifDateLabel"  
+                                           value="Modif. Date (dd/mm/yyyy): " 
+                                           rendered="false"/>
+                            <p:calendar id="newModifDate" size="10"  
+                                        navigator="false"  title="date format dd/mm/yyyy"   
+                                        showOn="false"                                                   
+                                        value="#{mT_PromotionTypeController.injectPromotionType.modifDate}" 
+                                        pattern="dd/MM/yyyy" mask="true" timeOnly="false"     
+                                        disabled="true"
+                                        immediate="true" 
+                                        rendered="false">
+                                <f:converter id="converterModifDateOutput" converterId="timestampShortConverter" /> 
+                            </p:calendar> 
+
+                            <p:outputLabel id="newPromotionTypeModifUserLabel" 
+                                           value="Modif. User: " 
+                                           rendered="false"/>
+                            <p:inputText id="newModifUser" label="Modif. User" 
+                                         disabled="true"
+                                         value="#{mT_PromotionTypeController.injectPromotionType.modifUser}"
+                                         rendered="false">                                 
+                            </p:inputText>
+
+
+                        </h:panelGrid>
+                        <h:panelGrid id="createDialogPanelButtons" columns="3" cellspacing="20" cellpadding="4">
+                            <p:commandButton value="#{properties.L_OK}" 
+                                             actionListener="#{mT_PromotionTypeController.createNew()}"                                                   
+                                             styleClass="ui-confirmdialog-yes" 
+                                             update="form:table"
+                                             icon="#{properties.I_OK}">
+                            </p:commandButton>
+                            <p:commandButton value="#{properties.L_CANCEL}"                                                  
+                                             styleClass="ui-confirmdialog-no" 
+                                             oncomplete="PF('createDialog').hide()" 
+                                             icon="#{properties.I_CANCEL}"
+                                             actionListener="#{mT_PromotionTypeController.pushResetButton}">
+                            </p:commandButton>
+                            <p:commandButton id="createDialogClear" 
+                                             value="Clear" 
+                                             icon="#{properties.F_I_CLEAR}" 
+                                             update="createDialogPanelData"
+                                             process="@this"                                             
+                                             actionListener="#{mT_PromotionTypeController.pushResetButton}" >
+                            </p:commandButton>
+                        </h:panelGrid>
+
+                    </p:dialog> 
+                </h:form>
+            </ui:define>
+        </ui:composition>
+    </h:body>
+</html>

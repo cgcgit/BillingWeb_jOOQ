@@ -1,0 +1,238 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    <f:metadata>  
+        <f:viewAction id="loadData" action="#{mT_TechnologyScopeController.loadDataList()}" phase="INVOKE_APPLICATION" >
+        </f:viewAction> 
+        <f:viewAction id="defaultControlVariables" action="#{mT_TechnologyScopeController.defaultValueControlVariablesIni()}" phase="INVOKE_APPLICATION" >
+        </f:viewAction>   
+    </f:metadata>
+
+    <h:body>        
+
+        <ui:composition id="mainTemplate" template="./../resources/templates/mainTemplate.xhtml">
+            <ui:define id="title" name="title">#{pages.T_PARAMETRICS_TECHNOLOGY_SCOPE} </ui:define>
+            <ui:define id="content" name="content">   
+                <h:form id="form"  >  
+                    <p:growl id="messageGrowl"  showDetail="true" autoUpdate="true"  /> 
+
+                    <p:remoteCommand id="remoteCommandUpdateTable" name="updateTable"  process="@this" update="form:table" />
+
+                    <p:dataTable id="table" var="data" 
+                                 value="#{mT_TechnologyScopeController.dataList}"                                     
+                                 emptyMessage="Any technology scope for this criteria"
+                                 resizableColumns="true" 
+                                 scrollable="true"  scrollWidth="100%" 
+                                 paginator="true"                                      
+                                 tableStyle="table-layout:fixed;width:100%;"
+                                 rows="10"     
+                                 editable="true"  
+                                 rowIndexVar="rowIndex"                                    
+                                 selection="#{mT_TechnologyScopeController.selectedData}">                            
+
+                        <f:facet id="facetHeader" name="header">  
+                            Technology Scope
+                            <p>
+                                <p:commandButton id="createButton" 
+                                                 value="New technology scope"
+                                                 title="Create a new technology scope for the promotions" 
+                                                 action="#{mT_TechnologyScopeController.pushNewButton()}" 
+                                                 update=":form:createDialogPanelData"
+                                                 rendered="#{mT_TechnologyScopeController.canUserEditModify()}"
+                                                 process="@this"> 
+                                </p:commandButton>
+                            </p>
+                        </f:facet>  
+                        <f:facet id="facetFooter" name="footer">                                 
+                        </f:facet> 
+
+
+                        <p:ajax id="ajaxRowEditInit" event="rowEditInit"  listener="#{mT_TechnologyScopeController.onRowInit}"  />
+                        <p:ajax id="ajaxRowEdit" event="rowEdit" listener="#{mT_TechnologyScopeController.onRowEdit}"  update="form:messageGrowl"                                                                                               
+                                oncomplete="if (!args.validationFailed) {updateTable();}">                            
+                        </p:ajax>
+                        <p:ajax id="ajaxRowEditCancel" event="rowEditCancel" listener="#{mT_TechnologyScopeController.onRowCancel}" update="form:messageGrowl" 
+                                oncomplete="if (!args.validationFailed) {updateTable();}"/>
+
+
+                        <!-- EDIT COLUMS -->   
+                        <p:column  id="deleteRow"
+                                   style="font-family:Arial Black;
+                                   text-align: center;
+                                   font-size: 12px;
+                                   width: 20px;    
+                                   overflow: hidden"
+                                   headerText="DEL ROW" 
+                                   rendered="#{mT_TechnologyScopeController.canUserEditModify()}"
+                                   >
+                            <p:commandButton  id="deleteButton" icon="fa fa-trash" 
+                                              actionListener="#{mT_TechnologyScopeController.pushDeleteButton}"
+                                              immediate="true" 
+                                              onclick="PF('deleteConfirmDialog').show()"
+                                              disabled="#{mT_TechnologyScopeController.editingMode}"
+                                              oncomplete="if(!args.validationFailed) {updateTable();}"
+                                              rendered="#{mT_TechnologyScopeController.canUserEditModify()}"                                
+                                              >     
+                                 <f:param id="currentRow" name="currentRow" value="#{rowIndex}" />
+                            </p:commandButton>
+
+                        </p:column>
+
+                        <p:column id="editRow" 
+                                  style="font-family:Arial Black;
+                                  text-align: center;
+                                  font-size: 12px;
+                                  width: 20px;    
+                                  overflow: hidden"
+                                  headerText="EDIT ROW" 
+                                  rendered="#{mT_TechnologyScopeController.canUserEditModify()}"
+                                  >
+                            <p:rowEditor id="editButton" rendered="#{mT_TechnologyScopeController.canUserEditModify()}" >                               
+                            </p:rowEditor>                 
+                        </p:column>
+
+                        <!-- DATA TABLE -->
+                        <p:column id="technologyScopeId" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 70px;    
+                                  overflow: hidden;
+                                  visibility: hidden"
+                                  headerText="#{tables.MT_TECHNOLOGY_SCOPE_TECHNOLOGY_SCOPE_ID}"                                       
+                                  rendered="false" >
+                            <h:outputText value="#{data.technologyScopeId}" />
+                        </p:column>    
+                        <p:column id="technologyScopeCode" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 100px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_TECHNOLOGY_SCOPE_TECHNOLOGY_SCOPE_CODE}"                                        
+                                  rendered="true" 
+                                  filterBy="#{data.technologyScopeCode}"  
+                                  filterMatchMode="contains">
+                            <h:outputText id="filterTechnologyScopeCode" value="" />
+                                  
+                            <p:cellEditor id="cellEditorTechnologyScopeCode">
+                                <f:facet id="facetTechnologyScopeCodeOutput" name="output">  
+                                    <h:outputText id="technologyScopeCodeOutput" value="#{data.technologyScopeCode}"/>  
+                                </f:facet>  
+                                <f:facet id="facetTechnologyScopeCodeInput" name="input">  
+                                    <p:inputText id="technologyScopeCodeInput" 
+                                                 label="Technology Scope Code"
+                                                 value="#{data.technologyScopeCode}" style="width:96%"
+                                                 required="true" requiredMessage="Technology Scope Code can't be null">  
+                                        <f:validateLength  minimum="1" maximum="10"/>
+                                        <p:ajax event="change" update="technologyScopeCodeOutput" />
+                                    </p:inputText>
+                                </f:facet>  
+                            </p:cellEditor>
+                        </p:column>
+                        
+                        <p:column id="technologyScopeDescription" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.MT_TECHNOLOGY_SCOPE_DESCRIPTION}" 
+                                  rendered="true" 
+                                  filterBy="#{data.description}"  
+                                  filterMatchMode="contains">        
+                            
+                            <h:outputText id="filterDescription" value="" />
+                                  
+                            <p:cellEditor id="cellEditorTechnologyScopeDescription">
+                                <f:facet id="facetTechnologyScopeDescriptionOutput" name="output">  
+                                    <h:outputText id="technologyScopeDescriptionOutput" value="#{data.description}"/>  
+                                </f:facet>  
+                                <f:facet id="facetTechnologyScopeDescription" name="input">  
+                                    <p:inputText id="technologyScopeDescriptionInput" 
+                                                 label="Discount Description"
+                                                 value="#{data.description}" style="width:96%"
+                                                 required="true" requiredMessage="Technology Scope Description can't be null"> 
+                                         <f:validateLength  minimum="1" maximum="100"/>
+                                        <p:ajax event="change" update="technologyScopeDescriptionOutput" />
+                                    </p:inputText>
+                                </f:facet>  
+                            </p:cellEditor>
+                        </p:column>
+
+
+                    </p:dataTable>
+                    <!-- New data dialog-->	
+                    <p:dialog id="createDialog"     
+                              header="Create new Technology Scope"                              
+                              widgetVar="createDialog">                            
+
+                        <h:panelGrid id="createDialogPanelData" columns="2" cellpadding="5">
+                            <p:outputLabel id="newTechnologyScopeCodeLabel" value="Technology Scope Code: " />
+                            <p:inputText id="newTechnologyScopeCodeInput" label="Technology Scope Code" 
+                                         value="#{mT_TechnologyScopeController.injectTechnologyScope.technologyScopeCode}">                                 
+                            </p:inputText>
+
+                            <p:outputLabel id="newTechnologyScopeDescriptionLabel"  value="Description: " />
+                            <p:inputText id="newTechnologyScopeDescriptionInput" 
+                                         label="Discount Description" 
+                                         value="#{mT_TechnologyScopeController.injectTechnologyScope.description}">                                 
+                            </p:inputText>
+                        </h:panelGrid>
+                        <h:panelGrid id="createDialogPanelButtons" columns="3" cellpadding="5">
+                            <p:commandButton value="#{properties.L_OK}" 
+                                             actionListener="#{mT_TechnologyScopeController.createNew()}"                                                   
+                                             styleClass="ui-confirmdialog-yes" 
+                                             update="form:table"
+                                             icon="#{properties.I_OK}">
+                            </p:commandButton>
+                            <p:commandButton value="#{properties.L_CANCEL}"                                                  
+                                             styleClass="ui-confirmdialog-no" 
+                                             oncomplete="PF('createDialog').hide()" 
+                                             icon="#{properties.I_CANCEL}"
+                                             actionListener="#{mT_TechnologyScopeController.pushResetButton}">
+                            </p:commandButton>
+                            <p:commandButton id="createDialogClear" 
+                                             value="Clear" 
+                                             icon="#{properties.F_I_CLEAR}" 
+                                             update="createDialogPanelData"
+                                             process="@this"
+                                             actionListener="#{mT_TechnologyScopeController.pushResetButton}" >
+                            </p:commandButton>
+                        </h:panelGrid>
+
+                    </p:dialog> 
+
+                    <!-- Delete confirm dialog -->	
+                    <p:confirmDialog global="true" 
+                                     styleClass="change-position" 
+                                     widgetVar="deleteConfirmDialog"
+                                     header="DELETE ROW"
+                                     message="Do you really want to delete this row?
+                                     (The row was inmediately delete on the system)"
+                                     >
+                        <p:commandButton id="okDeleteConfirmDialog" value="#{properties.L_OK}"                                           
+                                         styleClass="ui-confirmdialog-yes" 
+                                         actionListener="#{mT_TechnologyScopeController.deleteRow}"
+                                         oncomplete="PF('deleteConfirmDialog').hide()" 
+                                         process="@this"  
+                                         update="form:table"
+                                         icon="#{properties.I_OK}"/>
+                        <p:commandButton id="cancelDeleteConfirmDialog"
+                                         value="#{properties.L_CANCEL}"                                         
+                                         styleClass="ui-confirmdialog-no"    
+                                         oncomplete="PF('deleteConfirmDialog').hide()"     
+                                         type="button"
+                                         process="@this"  
+                                         icon="#{properties.I_CANCEL}"/>
+                    </p:confirmDialog> 
+                </h:form>
+            </ui:define>
+        </ui:composition>
+    </h:body>
+</html>

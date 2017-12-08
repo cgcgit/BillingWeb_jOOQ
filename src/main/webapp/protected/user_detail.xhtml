@@ -1,0 +1,486 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+
+
+    <f:metadata>  
+        <f:viewParam id="userId" name="userId" value="#{userDetailController.userId}" />           
+        <f:viewAction id="setUser" action="#{userDetailController.loadUserDetail()}" phase="INVOKE_APPLICATION" >
+        </f:viewAction> 
+        <f:viewAction id="defaultControlVariables" action="#{userDetailController.defaultValueControlVariablesIni()}" phase="INVOKE_APPLICATION" >
+        </f:viewAction>   
+
+    </f:metadata>
+
+
+    <h:body>        
+
+        <ui:composition id="mainTemplate" template="./../resources/templates/mainTemplate.xhtml">
+            <ui:define id="title" name="title">#{pages.T_USER_DETAIL} </ui:define>
+            <ui:define id="content" name="content">   
+                <h:form id="userDetail"  >  
+                    <p:growl id="messages"  showDetail="true" autoUpdate="true"  /> 
+
+                    <p:remoteCommand id="remoteCommandUpdateTable" name="updateTable"  process="@this" update="userDetail:userDetailTable" />
+
+                    <p:dataTable id="userDetailTable" var="user" 
+                                 value="#{userDetailController.getUserListDetail()}"                                     
+                                 emptyMessage="Any user for this search criteria"
+                                 resizableColumns="true" 
+                                 scrollable="true"  scrollWidth="100%" 
+                                 paginator="true"                                      
+                                 tableStyle="table-layout:fixed;width:100%;"
+                                 rows="10"     
+                                 editable="true"  
+                                 rowIndexVar="rowIndex"                                    
+                                 selection="#{userDetailController.selectedUser}">                            
+
+                        <f:facet id="facetHeader" name="header">  
+                            Detail of the user                             
+                        </f:facet>  
+
+
+                        <f:facet id="facetFooter" name="footer">     
+                            <p:commandButton id="saveButton" value="Save Changes" title="Save the changes" 
+                                             icon="ui-icon-disk"
+                                             disabled="#{userDetailController.editingMode ||  !userDetailController.changes}"
+                                             immediate="true"                                             
+                                             actionListener="#{userDetailController.saveChanges()}" > 
+                                <p:confirm id="confirmDialog" header="SAVE CHANGES" message="Do you want to save the changes into the sistem?" icon="ui-icon-alert" />
+                            </p:commandButton>
+                        </f:facet> 
+
+                        <p:ajax id="ajaxRowEditInit" event="rowEditInit"  listener="#{userDetailController.onRowInit}" update="userDetail:messages " />
+                        <p:ajax id="ajaxRowEdit" event="rowEdit" listener="#{userDetailController.onRowEdit}"  update="userDetail:messages"                                                               
+                                
+                                oncomplete="if (!args.validationFailed) {updateTable();}">                            
+                        </p:ajax>
+                        <p:ajax id="ajaxRowEditCancel" event="rowEditCancel" listener="#{userDetailController.onRowCancel}" update="userDetail:messages userDetail:userDetailTable" oncomplete="updateTable()" />
+
+
+
+
+                        <!-- DATA -->   
+                        <p:column  id="addRow"
+                                   style="font-family:Arial Black;
+                                   text-align: center;
+                                   font-size: 12px;
+                                   width: 70px;    
+                                   overflow: hidden"
+                                   headerText="ADD ROW"                                       
+                                   >
+                            <p:commandButton  id="addButton" 
+                                              icon="fa fa-plus" 
+                                              actionListener="#{userDetailController.addRow()}"                                              
+                                              immediate ="true"   
+                                              disabled="#{userDetailController.editingMode}">                                                                               
+                            </p:commandButton>
+
+                        </p:column>
+                        <p:column  id="deleteRow"
+                                   style="font-family:Arial Black;
+                                   text-align: center;
+                                   font-size: 12px;
+                                   width: 70px;    
+                                   overflow: hidden"
+                                   headerText="DEL ROW"                                       
+                                   >
+                            <p:commandButton  id="deleteButton" icon="fa fa-trash" 
+                                              actionListener="#{userDetailController.deleteRow()}"
+                                              immediate="true"       
+                                              onclick="PF('confirmDialog').show()"
+                                              rendered ="#{(rowIndex +1) eq userDetailController.getUserListDetail().size()}"
+                                              disabled="#{userDetailController.editingMode}"
+                                              oncomplete="if(!args.validationFailed) {updateTable();}"
+                                              > 
+                            </p:commandButton>
+
+                        </p:column>
+
+                        <p:column id="editRow" 
+                                  style="font-family:Arial Black;
+                                  text-align: center;
+                                  font-size: 12px;
+                                  width: 70px;    
+                                  overflow: hidden"
+                                  headerText="EDIT ROW"                                                                                                        
+                                  >
+                            <p:rowEditor  id="editButton" >                               
+                            </p:rowEditor>                 
+                        </p:column>
+
+                        <p:column id="userId" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden;
+                                  visibility: hidden"
+                                  headerText="#{tables.IT_USER_COL_USER_ID}"                                       
+                                  rendered="false" >
+                            <h:outputText value="#{user.userId}" />
+                        </p:column>    
+                        
+                        <p:column id="userCode" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.IT_USER_COL_USER_CODE}"                                        
+                                  rendered="true" >
+                            <p:cellEditor id="cellEditorUserCode">
+                                <f:facet id="facetUserCodeOutput" name="output">  
+                                    <h:outputText id="userCodeOutput" value="#{user.userCode}"/>  
+                                </f:facet>  
+                                <f:facet id="facetUserCodeInput" name="input">  
+                                    <p:inputText id="userCodeInput" value="#{user.userCode}" style="width:96%"
+                                                 required="true" requiredMessage="User Code can't be null">  
+                                        <p:ajax event="change" update="userCodeOutput" />
+                                    </p:inputText>
+                                </f:facet>  
+                            </p:cellEditor>
+                        </p:column>
+                        <p:column id="userName" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.IT_USER_COL_USER_NAME}" rendered="true" >                                
+                            <p:cellEditor id="cellEditorUserName">
+                                <f:facet id="facetUserNameOutput" name="output">  
+                                    <h:outputText id="userNameOutput" value="#{user.userName}"/>  
+                                </f:facet>  
+                                <f:facet id="facetUserInput" name="input">  
+                                    <p:inputText id="userNameInput" value="#{user.userName}" style="width:96%"
+                                                 required="true" requiredMessage="User Name can't be null">  >                                         
+                                        <p:ajax event="change" update="userNameOutput" />
+                                    </p:inputText>
+                                </f:facet>  
+                            </p:cellEditor>
+                        </p:column>
+                        <p:column id="userPassword" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden;
+                                  visibility: hidden"
+                                  headerText="#{tables.IT_USER_COL_PASSWORD}" 
+                                  rendered="false" >
+                            <h:outputText id="userPasswordOutput" value="#{user.password}" />                                
+                        </p:column>
+                        <p:column id="profileId" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.IT_USER_COL_PROFILE_ID}" rendered="true" >
+                            <p:cellEditor id="cellEditorProfileId">
+                                <f:facet id="facetProfileIdOutput" name="output">  
+                                    <p:selectOneMenu id="profileOutput"                                                      
+                                                     editable="false" disabled="true" immediate="true"
+                                                     value="#{user.profileId}">                                         
+                                        <f:selectItems id="selectItemsProfileOutput" value="#{populateComboController.populateProfileMenu()}"                                                            
+                                                       itemDisabled="true"
+                                                       var="selectedProfileOutput"
+                                                       itemValue="#{user.profileId}"
+                                                       />                                            
+                                    </p:selectOneMenu>                             
+
+                                </f:facet>  
+                                <f:facet id="facetProfileIdInput" name="input">  
+                                    <p:selectOneMenu id="profileInput" immediate="true" 
+                                                     value="#{user.profileId}">   
+                                        <p:ajax event="change" update="profileOutput" />
+                                        <f:selectItems id="selectItemsProfileInput" value="#{populateComboController.populateProfileMenu()}"
+                                                       var="selectedProfileInput" 
+                                                       itemValue="#{user.profileId}" 
+                                                       >
+                                        </f:selectItems>
+                                    </p:selectOneMenu>
+                                </f:facet>  
+                            </p:cellEditor>
+                        </p:column>                            
+
+                        <p:column id="startDate" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.IT_USER_COL_START_DATE}" rendered="true" >
+                            <p:cellEditor id="cellEditorStartDate">
+                                <f:facet id="facetStartDateOutput" name="output">  
+                                    <p:calendar id="startDateOutput" disabled="true" size="19"  
+                                                mindate="01/01/1900" maxdate="31/12/9999"
+                                                navigator="false"  title="date format dd/mm/yyyy"   
+                                                showOn="false"                                                   
+                                                value="#{user.startDate}" 
+                                                pattern="dd/MM/yyyy" mask="true" timeOnly="false"                                                    
+                                                immediate="true" >
+                                        <f:converter id="converterStartDateOutput" converterId="timestampShortConverter" /> 
+                                    </p:calendar>   
+                                </f:facet>  
+                                <f:facet id="facetStartDateInput" name="input">  
+                                    <p:calendar id="startDateInput" size="10"
+                                                mindate="01/01/1900" maxdate="31/12/9999"
+                                                navigator="false"  title="date format dd/mm/yyyy"   showOn="false"                                                    
+                                                value="#{user.startDate}" 
+                                                pattern="dd/MM/yyyy" mask="true" timeOnly="false"
+                                                immediate="true"                                                    
+                                                >
+                                        <f:convertDateTime pattern="dd/MM/yyyy" />
+                                        <f:converter id="converterStartDateInput" converterId="timestampShortConverter" />
+                                        <f:validator validatorId="startDateValidator"/>
+                                        <p:ajax event="change" update="startDateOutput" />      
+                                    </p:calendar>                                              
+                                </f:facet>                                       
+                            </p:cellEditor>
+                        </p:column>                          
+
+                        <p:column id="endDate" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.IT_USER_COL_END_DATE}" rendered="true" >
+                            <p:cellEditor id="cellEditorEndDate">
+                                <f:facet id="facetEndDateOutput" name="output">  
+                                    <p:calendar id="endDateOutput" disabled="true" size="19"  
+                                                mindate="01/01/1900" maxdate="31/12/9999"
+                                                navigator="false"  title="date format dd/mm/yyyy"   
+                                                showOn="false"                                                    
+                                                value="#{user.endDate}" 
+                                                pattern="dd/MM/yyyy" mask="true" timeOnly="false"
+                                                immediate="true"
+                                                >
+                                        <f:converter id="converterEndDateOutput" converterId="timestampShortConverter" />
+                                    </p:calendar>                                                                                 
+                                </f:facet>  
+                                <f:facet id="facetEndDateInput" name="input">  
+                                    <p:calendar id="endDateInput" size="10"
+                                                mindate="01/01/1900" maxdate="31/12/9999"
+                                                navigator="false"  title="date format dd/mm/yyyy"   showOn="false"                                                    
+                                                value="#{user.endDate}"                                                     
+                                                pattern="dd/MM/yyyy" mask="true" 
+                                                timeOnly="false"
+                                                immediate="true"
+                                                >
+                                        <f:converter id="converterEndDateInput" converterId="timestampShortConverter" />
+                                        <f:validator validatorId="endDateValidator"/>
+                                        <p:ajax event="change" update="endDateOutput" />
+                                    </p:calendar>                                            
+                                </f:facet>  
+                            </p:cellEditor>
+                        </p:column>     
+
+                        <p:column id="statusId" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.IT_USER_COL_STATUS_ID}" rendered="true" >                     
+                            <p:cellEditor id="cellEditorStatusId">
+                                <f:facet id="facetStatusIdOutput" name="output">  
+                                    <p:selectOneMenu id="statusOutput" 
+                                                     editable="false" disabled="true"
+                                                     immediate="true"
+                                                     value="#{user.statusId}">                                         
+                                        <f:selectItems value="#{populateComboController.populateStatusMenu()}"       
+                                                       id="selectItemsStatusOutput"
+                                                       itemDisabled="true"
+                                                       var="selectedStatusOutput"                                                       
+                                                       itemValue="#{user.statusId}"
+                                                       />                                            
+                                    </p:selectOneMenu>    
+                                </f:facet>  
+                                <f:facet id="facetStatusIdInput" name="input">  
+                                    <p:selectOneMenu id="statusInput" value="#{user.statusId}"                                                       
+                                                     immediate="true"                                                     
+                                                     valueChangeListener="#{userDetailController.changeStatus}">                                                
+                                        <f:selectItems value="#{populateComboController.populateStatusMenu()}"
+                                                       id="selectItemsStatusInput"
+                                                       var="selectStatusInput" 
+                                                       itemValue="#{user.statusId}" >
+
+                                        </f:selectItems>
+                                         <f:param id="currentRow" name="currentRow" value="#{rowIndex}" />
+                                        <p:ajax event="change" immediate="true"   update="statusOutput"   />
+                                        
+                                    </p:selectOneMenu>
+                                </f:facet>  
+                            </p:cellEditor>
+                        </p:column>  
+
+                        <p:column id="inputDate" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.IT_USER_COL_INPUT_DATE}" rendered="true" >
+                            <p:cellEditor id="cellEditorInputDate">
+                                <f:facet id="facetInputDateOutput" name="output">  
+                                    <p:calendar id="inputDateOutput" size="19"  
+                                                mindate="01/01/1900" maxdate="31/12/9999"
+                                                navigator="false"  title="date format dd/mm/yyyy"   
+                                                showOn="false"
+                                                value="#{user.inputDate}" 
+                                                pattern="dd/MM/yyyy HH:mm:ss" mask="true" timeOnly="false"                                                    
+                                                disabled="true"
+                                                >
+                                        <f:converter id="converterInputDateOutput" converterId="timestampLongConverter" />
+                                    </p:calendar>                                                                                 
+                                </f:facet>  
+                                <f:facet id="facetInputDateInput" name="input">  
+                                    <p:calendar id="inputDateInput" size="19"
+                                                mindate="01/01/1900" maxdate="31/12/9999"
+                                                navigator="false"  title="date format dd/mm/yyyy"   showOn="false"
+                                                value="#{user.inputDate}" 
+                                                pattern="dd/MM/yyyy HH:mm:ss" mask="true" timeOnly="false"                                                    
+                                                disabled="true"
+                                                >
+                                        <f:converter id="converterInputDateInput" converterId="timestampLongConverter" />
+                                        <p:ajax event="change" update="inputDateOutput" />
+                                    </p:calendar>                                            
+                                </f:facet>  
+                            </p:cellEditor>
+                        </p:column>     
+
+                        <p:column id="inputUser" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.IT_USER_COL_INPUT_USER}" rendered="true" >                                
+                            <p:cellEditor id="cellEditorInputUser">
+                                <f:facet id="facetInputUserOutput" name="output">  
+                                    <h:outputText id="inputUserOutput" value="#{user.inputUser}"/>  
+                                </f:facet>  
+                                <f:facet id="facetInputUserInput" name="input">  
+                                    <p:inputText id="inputUserInput" value="#{user.inputUser}" style="width:96%">  
+                                        <p:ajax event="change" update="inputUserOutput" />
+                                    </p:inputText>
+                                </f:facet>  
+                            </p:cellEditor>
+                        </p:column>  
+
+                        <p:column id="modifDate" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.IT_USER_COL_MODIF_DATE}" 
+                                  rendered="true">
+                            <p:cellEditor id="cellEditorModifDate">
+                                <f:facet id="facetModifDateOutput" name="output">  
+                                    <p:calendar id="modifDateOutput" disabled="true" size="19"  
+                                                mindate="01/01/1900" maxdate="31/12/9999"
+                                                navigator="false"  title="date format dd/mm/yyyy"   
+                                                showOn="false"                                                    
+                                                value="#{user.modifDate}" 
+                                                pattern="dd/MM/yyyy HH:mm:ss" mask="true" timeOnly="false"
+                                                rendered="true"                                                       
+                                                >
+                                        <f:converter id="converterModifDateOutput" converterId="timestampLongConverter" />
+                                    </p:calendar>                                                                                 
+                                </f:facet>  
+                                <f:facet id="facetModifDateInput" name="input">  
+                                    <p:calendar id="modifDateInput" size="19"
+                                                mindate="01/01/1900" maxdate="31/12/9999"
+                                                navigator="false"  title="date format dd/mm/yyyy"   showOn="false"                                                    
+                                                value="#{user.modifDate}" 
+                                                pattern="dd/MM/yyyy HH:mm:ss" mask="true" timeOnly="false"
+                                                rendered="true"
+                                                disabled="true"
+                                                >
+                                        <f:converter id="converterModifDateInput" converterId="timestampLongConverter" />
+                                        <p:ajax event="change" update="modifDateOutput" />
+                                    </p:calendar>                                            
+                                </f:facet>  
+                            </p:cellEditor>
+                        </p:column>     
+
+                        <p:column id="modifUser" 
+                                  style="font-family:Arial Black;
+                                  text-align: left;
+                                  font-size: 12px;
+                                  width: 200px;    
+                                  overflow: hidden"
+                                  headerText="#{tables.IT_USER_COL_MODIF_USER}" rendered="true" >                             
+                            <p:cellEditor id="cellEditorModifUser">
+                                <f:facet id="facetModifUserOutput" name="output">  
+                                    <h:outputText id="modifUserOutput" value="#{user.modifUser}"/>  
+                                </f:facet>  
+                                <f:facet id="facetModifUserInput" name="input">  
+                                    <p:inputText id="userModifInput" 
+                                                 value="#{user.modifUser}" 
+                                                 style="width:96%"
+                                                 disabled="true">  
+                                       <p:ajax event="change" update="modifUserOutput" /> 
+                                    </p:inputText>
+                                </f:facet>  
+                            </p:cellEditor>
+                        </p:column>
+                    </p:dataTable>
+
+                    <!-- diálogo confirmación borrado -->	
+                    <p:confirmDialog global="true" 
+                                     styleClass="change-position" 
+                                     widgetVar="confirmDialog">
+                        <p:commandButton value="#{properties.L_OK}" 
+                                         type="button" 
+                                         styleClass="ui-confirmdialog-yes" 
+                                         oncomplete="PF('confirmDialog').hide()"                                         
+                                         icon="#{properties.I_OK}"/>
+                        <p:commandButton value="#{properties.L_CANCEL}" 
+                                         type="button" 
+                                         styleClass="ui-confirmdialog-no" 
+                                         oncomplete="PF('confirmDialog').hide()"                                         
+                                         icon="#{properties.I_CANCEL}"/>
+                    </p:confirmDialog>
+ 
+
+                    <p:confirmDialog  header="CANCEL RECORD"
+                                      id="CancelDialog"
+                                      widgetVar="confirmCancelDialog"
+                                      global="true"
+                                      message="The cancellation will affect both this record and future records. Do you want to continue with the cancellation?"
+                        >
+                        
+                                <p:commandButton value="#{properties.L_OK}" 
+                                                 styleClass="ui-confirmdialog-yes"                                          
+                                                 actionListener="#{userDetailController.cancelEntityOK()}"
+                                                 process="@this"                                                 
+                                                 oncomplete="PF('confirmCancelDialog').hide()"
+                                                 icon="#{properties.I_OK}"/>
+                                <p:commandButton value="#{properties.L_CANCEL}"
+                                                 styleClass="ui-confirmdialog-yes"                                          
+                                                 actionListener="#{userDetailController.cancelEntityKO()}"
+                                                 process="@this"
+                                                 oncomplete="PF('confirmCancelDialog').hide()"
+                                                 icon="#{properties.I_CANCEL}"/>
+                           
+                    </p:confirmDialog>
+
+
+                    <p></p>
+                    <p:commandButton id="goHome" value="GO HOME!" icon="ui-icon-arrowreturnthick-1-w" action="#{loginPageController.goHome()}">
+                    </p:commandButton>
+                </h:form>
+            </ui:define>
+        </ui:composition>
+    </h:body>
+</html>

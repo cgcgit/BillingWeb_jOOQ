@@ -1,0 +1,175 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+
+
+
+
+    
+    <f:metadata>  
+        <f:viewParam id="fromURL" name="fromURL" value="#{createUserController.fromURL}" />                   
+        <f:viewAction id="setfromURL" action="#{createUserController.saveURL()}" phase="INVOKE_APPLICATION" >
+        </f:viewAction>
+    </f:metadata>
+    
+    <h:body>
+        <!-- method executed before the page shows -->        
+        <ui:composition id ="composition" template="./../resources/templates/mainTemplate.xhtml">
+            <ui:define id="content" name="content">   
+                <h:form id="createUserForm"> 
+                    
+                    <p:growl  id="messages" for="messages" showDetail="true" autoUpdate="true"  /> 
+
+                    <p:panelGrid id="createUserPG" columns="3" layout="grid"  >
+                        
+                        <p:outputLabel id="userCodeOutputLabel" for="userCode"  
+                                       value="User Code :" 
+                                       title="User code (login name) for the user" />
+                        <p:inputText id="userCode" 
+                                     autocomplete="off"
+                                     value="#{createUserController.managedUser.userCode}" 
+                                     required="true"
+                                     validatorMessage="The field User Name is mandatory"/>
+
+                        <p:message id="userCodeMessage" for="userCode"  />
+
+                        <p:outputLabel id="userNameOutputLabel" for="userName"  value="User Name:" title="Complete user name for the user" />
+                        <p:inputText id="userName" 
+                                     autocomplete="off"
+                                     value="#{createUserController.managedUser.userName}" 
+                                     required="true"
+                                     validatorMessage="The field User Name is mandatory"/>
+
+                        <p:message id="userNameMessage" for="userName" />
+
+
+                        <p:outputLabel id="pwd1OutputLabel" for="pwd1" value="Password:" title="Password for the user" />  
+                        <p:password id="pwd1" 
+                                    value="#{createUserController.managedUser.password}" 
+                                    match="pwd2" label="Password 1" required="true"/>  
+
+                        <p:message id="pwd1Message" for="pwd1"/>
+
+
+
+                        <p:outputLabel id="pwd2OutputLabel" for="pwd2" value="Re-enter password:" title="Re-enter the password for the user" />  
+                        <p:password id="pwd2" value="#{createUserController.managedUser.password}" 
+                                    label="Password 2" required="true" 
+                                    validatorMessage="The password and the re-enter password must be the same"/>  
+
+                        <p:message id="pwd2Message"  for="pwd2"  />
+
+
+                        <p:outputLabel id="profileOutputLabel" for="profile"  value="Profile:" title="Profile for the user" />
+                        <p:selectOneMenu id="profile"  
+                                         value="#{createUserController.managedUser.profileId}"
+                                         required="true">
+                            <f:selectItem id="defaultProfileItem" itemValue="#{null}" itemLabel="-- select profile --" />
+                            <f:selectItems id="profileItem" value="#{populateComboController.populateProfileMenu()}" />
+                        </p:selectOneMenu>
+
+                        <p:message id="profileMessage" for="profile" />
+
+
+                        <p:outputLabel id="startDateOutputLabel" for="startDate" value="Effective start date:" title="Since the user is effective" />
+                        <p:panelGrid id="panelStartDate" columns="2">
+                            <p:calendar id="startDate" 
+                                        size="10"
+                                        mindate="01/01/1900" maxdate="31/12/9999"
+                                        navigator="false"  title="date format dd/mm/yyyy"   showOn="false"
+                                        requiredMessage="Dates between 01/01/1900 and 31/12/9999" value="#{createUserController.startDate}" 
+                                        pattern="dd/MM/yyyy" mask="true" timeOnly="false"
+                                        required="true"
+                                        >
+                            </p:calendar>
+                            <p:calendar id="startHour" 
+                                        size="8"
+                                        navigator="false"  title="hour format hh:mm:ss" showOn="false"
+                                        value="#{createUserController.startDate}" 
+                                        pattern="HH:mm:ss" mask="true"  timeOnly="true"
+                                        required="true" readonly="true"                            
+                                        >
+                            </p:calendar>
+                        </p:panelGrid>
+                        <p:message id="startDateMessage" for="startDate" />
+
+
+                        <p:outputLabel id="endDateOutputLabel" for="endDate" value="Effective end date:" title="Since the user is effective" />
+                        <p:panelGrid id="panelEndDate" columns="2">
+                            <p:calendar id="endDate" mindate="01/01/1900" maxdate="31/12/9999"
+                                        size="10"
+                                        navigator="false"  title="date format dd/mm/yyyy"  showOn="false"
+                                        requiredMessage="Dates between 01/01/1900 and 31/12/9999" value="#{createUserController.endDate}" 
+                                        pattern="dd/MM/yyyy" mask="true" timeOnly="false"
+                                        required="true"
+                                        >
+                            </p:calendar>
+                            <p:calendar id="endHour" 
+                                        size="8"
+                                        navigator="false"  title="hour format hh:mm:ss"  showOn="false"
+                                        value="#{createUserController.endDate}" 
+                                        pattern="HH:mm:ss" mask="true" timeOnly="true"
+                                        required="true" readonly="true"
+                                        >
+                            </p:calendar>
+                        </p:panelGrid>
+                        <p:message id="endDateMessage" for="endDate" />
+
+
+                        <p:outputLabel id="statusOutputLabel" for="status"  value="Status:" title="Status for the user" />
+                        <p:selectOneMenu id="status"  
+                                         value="#{createUserController.managedUser.statusId}" 
+                                         required="true">
+                            <f:selectItem id="statusDefaultItem" itemValue="#{null}" itemLabel="-- select status --" />
+                            <f:selectItems id="statusItem" value="#{populateComboController.populateStatusMenu()}" />
+                        </p:selectOneMenu>
+
+                        <p:message id="statusMessage" for="status" />
+
+                        <p:outputLabel for="inputUser"  value="Creator user:" title="User code (login name) for the creator of the new user" />
+                        <p:inputText id="inputUser" value="#{createUserController.managedUser.inputUser}" 
+                                     readonly="true"  />
+
+                        <p:message id="inputUserMessage" for="inputUser"/>
+
+                        <p:outputLabel id="inputDateOutputLabel" for="inputDate"  value="Creation date:" title="Creation date of the new user" />
+                        <p:panelGrid id="panelInputDate" columns="2">
+                            <p:calendar id="inputDate" 
+                                        size="10"
+                                        mindate="01/01/1900" maxdate="31/12/9999"
+                                        title="date format dd/mm/yyyy"   showOn="false"
+                                        requiredMessage="Dates between 01/01/1900 and 31/12/9999" value="#{createUserController.inputDate}" 
+                                        pattern="dd/MM/yyyy" mask="true" 
+                                        readonly="true"
+                                        >             
+                            </p:calendar>
+                            <p:calendar id="inputHour" 
+                                        size="8"
+                                        navigator="true"  title="hour format hh:mm:ss"   showOn="false"
+                                        requiredMessage="Dates between 01/01/1900 and 31/12/9999" value="#{createUserController.inputDate}" 
+                                        pattern="HH:mm:ss" mask="true" timeOnly="true" 
+                                        readonly="true"
+                                        >             
+                            </p:calendar>                    
+                        </p:panelGrid>
+                        <p:message id="inputDateMessage" for="inputDate"/>
+
+
+                    </p:panelGrid>
+
+
+                    <p:commandButton id="saveButton" value="SaveButton" action="#{createUserController.saveUser}" icon="ui-icon-disk" update="createUserForm:messages createUserForm:createUserPG"/>
+
+                    <p:commandButton id="cleanButton" value="Clean" actionListener="#{createUserController.cleanInfo()}" update="createUserForm:messages" >
+                        <p:ajax id="ajaxCleanButton" update="createUserForm:createUserPG" resetValues="true" />                                
+                    </p:commandButton>
+                </h:form>
+            </ui:define>     
+        </ui:composition>
+    </h:body>
+</html>
